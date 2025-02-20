@@ -392,6 +392,31 @@ class Environment(jinja2.Environment):
         result = self.render_string(string=string, variables=variables, **kwargs)
         return result not in ["None", "False", ""]
 
+    async def render_condition_async(
+        self,
+        string: str,
+        variables: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> bool:
+        """Render a template condition.
+
+        This function renders a template string and evaluates its
+        result as a boolean. It returns True if the result is truthy
+        (not None, False, or an empty string), otherwise False.
+
+        Args:
+            string: String to evaluate for True-ishness
+            variables: Extra variables for the rendering
+            kwargs: Further extra variables for rendering
+
+        Returns:
+            True if the rendered string is truthy, False otherwise.
+        """
+        result = await self.render_string_async(
+            string=string, variables=variables, **kwargs
+        )
+        return result not in ["None", "False", ""]
+
     def render_string(
         self,
         string: str,
@@ -420,6 +445,34 @@ class Environment(jinja2.Environment):
             raise SyntaxError(msg) from e
         return template.render(**variables)
 
+    async def render_string_async(
+        self,
+        string: str,
+        variables: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> str:
+        """Render a template string.
+
+        This function renders the given template string using the
+        current environment's configuration and globals.
+
+        Args:
+            string: String to render
+            variables: Extra variables for the rendering
+            kwargs: Further extra variables for rendering
+
+        Returns:
+            The rendered string.
+        """
+        variables = (variables or {}) | kwargs
+        cls = self.template_class
+        try:
+            template = cls.from_code(self, self.compile(string), self.globals, None)
+        except TemplateSyntaxError as e:
+            msg = f"Error when evaluating \n{string}\n (extra globals: {variables})"
+            raise SyntaxError(msg) from e
+        return await template.render_async(**variables)
+
     def render_file(
         self,
         file: str | os.PathLike[str],
@@ -446,6 +499,33 @@ class Environment(jinja2.Environment):
         """
         content = envglobals.load_file_cached(str(file))
         return self.render_string(content, variables, **kwargs)
+
+    async def render_file_async(
+        self,
+        file: str | os.PathLike[str],
+        variables: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> str:
+        """Helper to directly render a template from filesystem.
+
+        This function renders a template file directly from the
+        filesystem using the current environment's configuration and
+        globals.
+
+        !!! info
+            The file content is cached, which is generally acceptable
+            for common use cases.
+
+        Args:
+            file: Template file to load
+            variables: Extra variables for the rendering
+            kwargs: Further extra variables for rendering
+
+        Returns:
+            The rendered string.
+        """
+        content = envglobals.load_file_cached(str(file))
+        return await self.render_string_async(content, variables, **kwargs)
 
     def render_template(
         self,
@@ -488,6 +568,49 @@ class Environment(jinja2.Environment):
         return self.concat(block_render_func(ctx))  # type: ignore
         # except Exception:
         #     self.handle_exception()
+
+    async def render_template_async(
+        self,
+        template_name: str,
+        variables: dict[str, Any] | None = None,
+        block_name: str | None = None,
+        parent_template: str | None = None,
+        **kwargs: Any,
+    ) -> str:
+        """Render a loaded template (or a block of a template).
+
+        This function renders a loaded template or a specific block from
+        a template. It allows for the inclusion of parent templates and
+        provides the flexibility to render individual blocks.
+
+        Args:
+            template_name: Template name
+            variables: Extra variables for rendering
+            block_name: Render specific block from the template
+            parent_template: The name of the parent template importing this template
+            kwargs: Further extra variables for rendering
+
+        Returns:
+            The rendered string.
+
+        Raises:
+            BlockNotFoundError: If the specified block is not found in the
+            template.
+        """
+        variables = (variables or {}) | kwargs
+        template = self.get_template(template_name, parent=parent_template)
+        if not block_name:
+            return await template.render_async(**variables)
+        try:
+            block_render_func = template.blocks[block_name]
+        except KeyError:
+            raise BlockNotFoundError(block_name, template_name) from KeyError
+
+        ctx = template.new_context(variables)
+        return self.concat(  # type: ignore
+            [n async for n in block_render_func(ctx)]  # type: ignore
+        )
+        # return self.concat(block_render_func(ctx))
 
     @contextlib.contextmanager
     def with_globals(self, **kwargs: Any):
