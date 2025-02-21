@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import functools
 import pathlib
 from typing import TYPE_CHECKING, Any
 
 import jinja2
+import upathtools
 
 from jinjarope import envglobals, loaders as loaders_, utils
 
@@ -12,6 +14,11 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     import fsspec
+
+
+@functools.cache
+async def get_template(path: str) -> str:
+    return await upathtools.read_path(path)
 
 
 class FsSpecProtocolPathLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
@@ -43,6 +50,18 @@ class FsSpecProtocolPathLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
     ) -> tuple[str, str, Callable[[], bool] | None]:
         try:
             src = envglobals.load_file_cached(template)
+        except FileNotFoundError as e:
+            raise jinja2.TemplateNotFound(template) from e
+        path = pathlib.Path(template).as_posix()
+        return src, path, lambda: True
+
+    async def get_source_async(
+        self,
+        environment: jinja2.Environment | None,
+        template: str,
+    ) -> tuple[str, str, Callable[[], bool] | None]:
+        try:
+            src = await get_template(template)
         except FileNotFoundError as e:
             raise jinja2.TemplateNotFound(template) from e
         path = pathlib.Path(template).as_posix()
@@ -148,6 +167,23 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
         try:
             with self.fs.open(template) as file:
                 src = file.read().decode()  # pyright: ignore
+        except FileNotFoundError as e:
+            raise jinja2.TemplateNotFound(template) from e
+        path = pathlib.Path(template).as_posix()
+        return src, path, lambda: True
+
+    async def get_source_async(
+        self,
+        environment: jinja2.Environment,
+        template: str,
+    ) -> tuple[str, str, Callable[[], bool] | None]:
+        from upathtools.async_ops import get_async_fs
+
+        fs = await get_async_fs(self.fs)
+        try:
+            file = await fs.open_async(template)
+            async with file:
+                src = await file.read().decode()  # pyright: ignore
         except FileNotFoundError as e:
             raise jinja2.TemplateNotFound(template) from e
         path = pathlib.Path(template).as_posix()
