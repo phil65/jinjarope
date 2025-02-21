@@ -85,7 +85,7 @@ def parse_locale(locale: str) -> Locale:
 
 def install_translations(
     env: jinja2.Environment, locale: str | Locale, dirs: Sequence[str | os.PathLike[str]]
-) -> None:
+):
     """Install translations for the given locale in the Jinja environment.
 
     Args:

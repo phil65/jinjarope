@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class LoaderRegistry:
     """Registry which caches and builds jinja loaders."""
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.fs_loaders: dict[str, loaders.FileSystemLoader] = {}
         self.fsspec_loaders: dict[str, fsspecloaders.FsSpecFileSystemLoader] = {}
         self.package_loaders: dict[str, loaders.PackageLoader] = {}

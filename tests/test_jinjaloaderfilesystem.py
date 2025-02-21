@@ -30,13 +30,13 @@ def fs(env: jinja2.Environment) -> jinjaloaderfilesystem.JinjaLoaderFileSystem:
     return jinjaloaderfilesystem.JinjaLoaderFileSystem(env)
 
 
-def test_protocol(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_protocol(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test protocol attribute."""
     assert fs.protocol == "jinja"
     assert fs.async_impl is True
 
 
-def test_ls_root(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_ls_root(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test listing root directory."""
     assert fs.ls("") == [
         {"name": "subfolder", "type": "directory"},
@@ -46,7 +46,7 @@ def test_ls_root(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
     assert fs.ls("", detail=False) == ["subfolder", "about.html", "home.html"]
 
 
-def test_ls_subdirectory(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_ls_subdirectory(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test listing subdirectory."""
     assert fs.ls("subfolder/", detail=False) == ["nested", "sub.html"]
     assert fs.ls("subfolder/", detail=True) == [
@@ -55,7 +55,7 @@ def test_ls_subdirectory(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> Non
     ]
 
 
-def test_ls_nested_directory(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_ls_nested_directory(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test listing nested directory."""
     assert fs.ls("subfolder/nested/", detail=False) == ["deep.html"]
     assert fs.ls("subfolder/nested/", detail=True) == [
@@ -63,20 +63,20 @@ def test_ls_nested_directory(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) ->
     ]
 
 
-def test_cat_single_file(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_cat_single_file(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test reading a single file."""
     assert fs.cat("home.html") == b"Home"
     assert fs.cat("about.html") == b"About"
     assert fs.cat("subfolder/sub.html") == b"Sub"
 
 
-def test_cat_multiple_files(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_cat_multiple_files(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test reading multiple files."""
     result = fs.cat(["home.html", "about.html"])
     assert result == {"home.html": b"Home", "about.html": b"About"}
 
 
-def test_isfile(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_isfile(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test isfile method."""
     assert fs.isfile("home.html") is True
     assert fs.isfile("subfolder/sub.html") is True
@@ -84,7 +84,7 @@ def test_isfile(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
     assert fs.isfile("subfolder") is False
 
 
-def test_isdir(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_isdir(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test isdir method."""
     assert fs.isdir("") is True
     assert fs.isdir("/") is True
@@ -95,7 +95,7 @@ def test_isdir(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
     assert fs.isdir("nonexistent") is False
 
 
-async def test_async_operations(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+async def test_async_operations(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test async operations."""
     assert await fs._cat_file("home.html") == b"Home"
     assert await fs._ls("", detail=True) == fs.ls("", detail=True)
@@ -103,7 +103,7 @@ async def test_async_operations(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem)
     assert file.read() == b"Home"
 
 
-def test_error_cases(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_error_cases(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test error cases."""
     with pytest.raises(FileNotFoundError, match="Template not found"):
         fs.cat("nonexistent.html")
@@ -120,21 +120,21 @@ def test_error_cases(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
         fs.open("no-loader-set")
 
 
-def test_fsspec_integration(env: jinja2.Environment) -> None:
+def test_fsspec_integration(env: jinja2.Environment):
     """Test integration with fsspec."""
     fsspec.register_implementation("jinja", jinjaloaderfilesystem.JinjaLoaderFileSystem)
     fs = fsspec.filesystem("jinja", env=env)
     assert fs.cat("home.html") == b"Home"
 
 
-def test_exists(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_exists(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test exists method."""
     assert fs.exists("home.html") is True
     assert fs.exists("subfolder") is True
     assert fs.exists("nonexistent") is False
 
 
-def test_info(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem) -> None:
+def test_info(fs: jinjaloaderfilesystem.JinjaLoaderFileSystem):
     """Test info method."""
     file_info = fs.info("home.html")
     assert file_info["type"] == "file"

@@ -125,7 +125,7 @@ class PackageLoader(LoaderMixin, jinja2.PackageLoader):
         package: str | types.ModuleType,
         package_path: str | None = None,
         encoding: str = "utf-8",
-    ) -> None:
+    ):
         """Instanciate a PackageLoader.
 
         Compared to the jinja2 equivalent, this loader also supports

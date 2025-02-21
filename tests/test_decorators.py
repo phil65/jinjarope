@@ -6,7 +6,7 @@ import pytest
 from jinjarope.decorators import cache_with_transforms
 
 
-def test_basic_caching() -> None:
+def test_basic_caching():
     """Test basic function caching without transformers."""
     call_count = 0
 
@@ -22,7 +22,7 @@ def test_basic_caching() -> None:
     assert add.cache_info()["cache_size"] == 1
 
 
-def test_arg_transformer() -> None:
+def test_arg_transformer():
     """Test caching with argument transformers."""
 
     @cache_with_transforms(arg_transformers={0: lambda x: x.lower()})
@@ -34,7 +34,7 @@ def test_arg_transformer() -> None:
     assert greet.cache_info()["cache_size"] == 1
 
 
-def test_kwarg_transformer() -> None:
+def test_kwarg_transformer():
     """Test caching with keyword argument transformers."""
 
     @cache_with_transforms(kwarg_transformers={"items": tuple})
@@ -46,7 +46,7 @@ def test_kwarg_transformer() -> None:
     assert process_list.cache_info()["cache_size"] == 1
 
 
-def test_unhashable_args() -> None:
+def test_unhashable_args():
     """Test caching with unhashable arguments."""
 
     @cache_with_transforms(arg_transformers={0: tuple})
@@ -58,7 +58,7 @@ def test_unhashable_args() -> None:
     assert process_list.cache_info()["cache_size"] == 1
 
 
-def test_mixed_args_kwargs() -> None:
+def test_mixed_args_kwargs():
     """Test caching with both positional and keyword arguments."""
 
     @cache_with_transforms(
@@ -72,7 +72,7 @@ def test_mixed_args_kwargs() -> None:
     assert process_data.cache_info()["cache_size"] == 1
 
 
-def test_multiple_calls_different_args() -> None:
+def test_multiple_calls_different_args():
     """Test caching behavior with different arguments."""
     call_count = 0
 
@@ -89,7 +89,7 @@ def test_multiple_calls_different_args() -> None:
     assert add.cache_info()["cache_size"] == 2
 
 
-def test_none_values() -> None:
+def test_none_values():
     """Test caching behavior with None values."""
 
     @cache_with_transforms()
@@ -101,7 +101,7 @@ def test_none_values() -> None:
     assert process_optional.cache_info()["cache_size"] == 1
 
 
-def test_empty_transformers() -> None:
+def test_empty_transformers():
     """Test that decorator works with empty transformers."""
 
     @cache_with_transforms(arg_transformers={}, kwarg_transformers={})
@@ -112,7 +112,7 @@ def test_empty_transformers() -> None:
     assert identity.cache_info()["cache_size"] == 1
 
 
-def test_cache_persistence() -> None:
+def test_cache_persistence():
     """Test that cache persists between calls."""
 
     @cache_with_transforms()
@@ -125,7 +125,7 @@ def test_cache_persistence() -> None:
     assert expensive_operation.cache is initial_cache
 
 
-def test_different_kwarg_orders() -> None:
+def test_different_kwarg_orders():
     """Test that different keyword argument orders produce same cache key."""
 
     @cache_with_transforms()
@@ -137,7 +137,7 @@ def test_different_kwarg_orders() -> None:
     assert process_kwargs.cache_info()["cache_size"] == 1
 
 
-def test_complex_transformers() -> None:
+def test_complex_transformers():
     """Test with more complex transformer functions."""
 
     def complex_transform(x: list[Any]) -> tuple[Any, ...]:
@@ -155,7 +155,7 @@ def test_complex_transformers() -> None:
     assert process_lists.cache_info()["cache_size"] == 1
 
 
-def test_error_handling() -> None:
+def test_error_handling():
     """Test that errors in the original function are not cached."""
 
     @cache_with_transforms()

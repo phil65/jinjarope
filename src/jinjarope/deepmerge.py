@@ -92,9 +92,7 @@ class DeepMerger:
 
     mergers: dict[type[Any], Callable[..., Any]] = DEFAULT_MERGERS
 
-    def __init__(
-        self, mergers: dict[type[Any], Callable[..., Any]] | None = None
-    ) -> None:
+    def __init__(self, mergers: dict[type[Any], Callable[..., Any]] | None = None):
         """Initialize the DeepMerger with custom merge strategies.
 
         Args:
