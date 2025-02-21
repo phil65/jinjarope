@@ -11,6 +11,19 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import weakref
 
 import jinja2
+from jinja2.defaults import (
+    BLOCK_END_STRING,
+    BLOCK_START_STRING,
+    COMMENT_END_STRING,
+    COMMENT_START_STRING,
+    KEEP_TRAILING_NEWLINE,
+    LINE_COMMENT_PREFIX,
+    LINE_STATEMENT_PREFIX,
+    LSTRIP_BLOCKS,
+    NEWLINE_SEQUENCE,
+    VARIABLE_END_STRING,
+    VARIABLE_START_STRING,
+)
 from jinja2.exceptions import TemplateSyntaxError
 import jinja2.nodes
 
@@ -26,8 +39,10 @@ from jinjarope import (
 
 
 if TYPE_CHECKING:
-    from collections.abc import MutableMapping, Sequence
+    from collections.abc import Callable, MutableMapping, Sequence
     from types import CodeType
+
+    from jinja2.ext import Extension
 
 
 logger = logging.getLogger(__name__)
@@ -56,45 +71,94 @@ class Environment(jinja2.Environment):
         loader: (
             jinja2.BaseLoader | list[jinja2.BaseLoader] | dict | list[dict] | None
         ) = None,
-        **kwargs: Any,
+        block_start_string: str = BLOCK_START_STRING,
+        block_end_string: str = BLOCK_END_STRING,
+        variable_start_string: str = VARIABLE_START_STRING,
+        variable_end_string: str = VARIABLE_END_STRING,
+        comment_start_string: str = COMMENT_START_STRING,
+        comment_end_string: str = COMMENT_END_STRING,
+        line_statement_prefix: str | None = LINE_STATEMENT_PREFIX,
+        line_comment_prefix: str | None = LINE_COMMENT_PREFIX,
+        lstrip_blocks: bool = LSTRIP_BLOCKS,
+        newline_sequence: Literal["\n", "\r\n", "\r"] = NEWLINE_SEQUENCE,
+        keep_trailing_newline: bool = KEEP_TRAILING_NEWLINE,
+        extensions: Sequence[str | type[Extension]] = (),
+        optimized: bool = True,
+        finalize: Callable[..., Any] | None = None,
+        autoescape: bool | Callable[[str | None], bool] = False,
+        bytecode_cache: jinja2.BytecodeCache | None = None,
+        enable_async: bool = False,
     ):
-        """Constructor.
-
-        This constructor initializes the environment with custom
-        configuration and loads default filters, tests, functions and
-        globals. It also registers the custom ``render_template``,
-        ``render_string``, ``render_file`` and ``evaluate`` functions
-        as filters.
-
-        !!! info "Changes from Jinja2"
-            The ``trim_blocks`` parameter is set to ``True`` by default,
-            and the ``cache_size`` is set to ``-1``, which disables
-            automatic cache cleanup.
+        """Initialize an enhanced Jinja environment with custom settings.
 
         Args:
-            undefined: Handling of "Undefined" errors
-            trim_blocks: Whitespace handling
-            cache_size: Amount of templates to cache
-            auto_reload: Whether to check templates for changes on loading
-            loader: Loader to use (Also accepts a JSON representation of loaders)
-            kwargs: Keyword arguments passed to parent
+            undefined: How undefined variables are handled ("strict", "lenient", etc.)
+            trim_blocks: Strip first newline after a block
+            cache_size: Size of the template cache (-1 for no limit)
+            auto_reload: Automatically reload changed templates
+            loader: Template loader or configuration
+            block_start_string: String denoting start of block
+            block_end_string: String denoting end of block
+            variable_start_string: String denoting start of variable
+            variable_end_string: String denoting end of variable
+            comment_start_string: String denoting start of comment
+            comment_end_string: String denoting end of comment
+            line_statement_prefix: Prefix for line statements
+            line_comment_prefix: Prefix for line comments
+            lstrip_blocks: Strip whitespace before blocks
+            newline_sequence: Sequence to use for newlines
+            keep_trailing_newline: Preserve trailing newline when rendering
+            extensions: Jinja2 extensions to load
+            optimized: Enable template optimization
+            finalize: Function to post-process variables
+            autoescape: Auto-escaping behavior
+            bytecode_cache: Cache for the bytecode
+            enable_async: Enable async template execution
+
+        Note:
+            This environment differs from standard Jinja2 by:
+            - Using strict undefined behavior by default
+            - Setting trim_blocks to True by default
+            - Disabling automatic cache cleanup (cache_size = -1)
+            - Adding additional filters and functions
+            - Enabling loop controls and do extension by default
         """
         self.cache_code = True
         self.context_class = Context
+
         if isinstance(undefined, str):
             undefined = undefined_.UNDEFINED_BEHAVIOR[undefined]
-        kwargs = dict(
-            undefined=undefined,
-            trim_blocks=trim_blocks,
-            auto_reload=auto_reload,
-            cache_size=cache_size,
-            loader=loaders.from_json(loader),
-            **kwargs,
-        )
+
+        if isinstance(loader, dict | list):
+            loader = loaders.from_json(loader)
+
         self._extra_files: set[str] = set()
         self._extra_paths: set[str] = set()
-        super().__init__(**kwargs)
 
+        super().__init__(
+            undefined=undefined,
+            trim_blocks=trim_blocks,
+            cache_size=cache_size,
+            auto_reload=auto_reload,
+            loader=loader,
+            block_start_string=block_start_string,
+            block_end_string=block_end_string,
+            variable_start_string=variable_start_string,
+            variable_end_string=variable_end_string,
+            comment_start_string=comment_start_string,
+            comment_end_string=comment_end_string,
+            line_statement_prefix=line_statement_prefix,
+            line_comment_prefix=line_comment_prefix,
+            lstrip_blocks=lstrip_blocks,
+            newline_sequence=newline_sequence,
+            keep_trailing_newline=keep_trailing_newline,
+            extensions=extensions,
+            optimized=optimized,
+            finalize=finalize,
+            autoescape=autoescape,
+            bytecode_cache=bytecode_cache,
+            enable_async=enable_async,
+        )
         # Update namespaces
         folder = pathlib.Path(__file__).parent / "resources"
         self.load_jinja_file(folder / "filters.toml")
