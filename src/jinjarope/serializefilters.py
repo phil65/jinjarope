@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import configparser
-import io
-import json
 from typing import TYPE_CHECKING, Any, Literal
 
 from jinjarope import deepmerge
@@ -23,32 +20,9 @@ def serialize(data: Any, fmt: SerializeFormatStr, **kwargs: Any) -> str:
         fmt: The serialization format
         kwargs: Keyword arguments passed to the dumper function
     """
-    match fmt:
-        case "yaml":
-            import yamling
+    from yamling import dump_universal
 
-            return yamling.dump_yaml(data, **kwargs)
-        case "json":
-            return json.dumps(data, indent=4, **kwargs)
-        case "ini":
-            config = configparser.ConfigParser(**kwargs)
-            config.read_dict(data)
-            file = io.StringIO()
-            with file as fp:
-                config.write(fp)
-                return file.getvalue()
-        case "toml" if isinstance(data, dict):
-            import tomli_w
-
-            return tomli_w.dumps(data, **kwargs)
-        case _:
-            raise TypeError(fmt)
-
-
-def load_ini(data: str) -> dict[str, dict[str, str]]:
-    config = configparser.ConfigParser()
-    config.read_string(data)
-    return {s: dict(config.items(s)) for s in config.sections()}
+    return dump_universal.dump(data, mode=fmt, **kwargs)
 
 
 def deserialize(data: str, fmt: SerializeFormatStr, **kwargs: Any) -> Any:
@@ -59,21 +33,9 @@ def deserialize(data: str, fmt: SerializeFormatStr, **kwargs: Any) -> Any:
         fmt: The serialization format
         kwargs: Keyword arguments passed to the loader function
     """
-    match fmt:
-        case "yaml":
-            import yamling
+    from yamling import load_universal
 
-            return yamling.load_yaml(data, **kwargs)
-        case "json":
-            return json.loads(data, **kwargs)
-        case "ini":
-            return load_ini(data, **kwargs)
-        case "toml":
-            import tomllib
-
-            return tomllib.loads(data, **kwargs)
-        case _:
-            raise TypeError(fmt)
+    return load_universal.load(data, mode=fmt, **kwargs)
 
 
 def dig(
