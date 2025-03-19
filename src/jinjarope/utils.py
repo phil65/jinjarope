@@ -5,16 +5,13 @@ import functools
 import importlib
 from importlib.metadata import entry_points as _entry_points
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar
-
-from jinjarope import envtests
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar, cast, overload
 
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
     from dataclasses import Field
     import os
-    import types
 
 
 logger = logging.getLogger(__name__)
@@ -141,11 +138,30 @@ def get_hash(obj: Any, hash_length: int | None = 7) -> str:
     return hash_md5.hexdigest()[:hash_length]
 
 
-@functools.cache
+@overload
 def resolve(
     name: str,
     module: str | None = None,
-) -> types.ModuleType | Callable[..., Any]:
+    *,
+    py_type: None = None,
+) -> Any: ...
+
+
+@overload
+def resolve[T](
+    name: str,
+    module: str | None = None,
+    *,
+    py_type: type[T],
+) -> T: ...
+
+
+@functools.cache
+def resolve[T](
+    name: str,
+    module: str | None = None,
+    py_type: type[T] | None = None,
+) -> T | Any:
     """Resolve ``name`` to a Python object via imports / attribute lookups.
 
     If ``module`` is None, ``name`` must be "absolute" (no leading dots).
@@ -153,8 +169,21 @@ def resolve(
     If ``module`` is not None, and ``name`` is "relative" (has leading dots),
     the object will be found by navigating relative to ``module``.
 
-    Returns the object, if found.  If not, propagates the error.
+    Args:
+        name: The name to resolve
+        module: Optional base module for relative imports
+        py_type: Optional type to validate the resolved object against
+
+    Returns:
+        The resolved object
+
+    Raises:
+        ValueError: If using a relative name without a base module
+        TypeError: If py_type is provided and the resolved object
+                  doesn't match that type
     """
+    from jinjarope import envtests
+
     names = name.split(".")
     if not names[0]:
         if module is None:
@@ -171,8 +200,10 @@ def resolve(
     if envtests.is_python_builtin(used):
         import builtins
 
-        return getattr(builtins, used)
-    found = importlib.import_module(used)
+        found = getattr(builtins, used)
+    else:
+        found = importlib.import_module(used)
+
     for n in names:
         used += "." + n
         try:
@@ -185,7 +216,12 @@ def resolve(
                 mod = ".".join(used.split(".")[:-1])
                 importlib.import_module(mod)
                 found = getattr(found, n)
-    return found
+
+    if py_type is not None and not isinstance(found, py_type):
+        msg = f"Expected {py_type.__name__}, but {name} is {type(found).__name__}"
+        raise TypeError(msg)
+
+    return cast(T, found) if py_type is not None else found
 
 
 if __name__ == "__main__":
