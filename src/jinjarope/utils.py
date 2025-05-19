@@ -120,9 +120,15 @@ def _get_black_formatter() -> Callable[[str, int], str]:
 
 @functools.lru_cache
 def entry_points(group: str) -> Mapping[str, Callable[..., Any]]:
-    eps = {ep.name: ep.load() for ep in _entry_points(group=group)}
-    logger.debug("Available %r entry points: %s", group, sorted(eps))
-    return eps
+    result = {}
+    for ep in _entry_points(group=group):
+        try:
+            result[ep.name] = ep.load()
+        except Exception as e:  # noqa: BLE001
+            msg = "Failed to load entry point %r from group %r: %s"
+            logger.warning(msg, ep.name, group, str(e))
+    logger.debug("Available %r entry points: %s", group, sorted(result))
+    return result
 
 
 def get_hash(obj: Any, hash_length: int | None = 7) -> str:
