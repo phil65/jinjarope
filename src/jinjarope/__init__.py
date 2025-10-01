@@ -1,5 +1,4 @@
-__version__ = "0.17.2"
-
+from importlib.metadata import version as _metadata_version
 
 from .environment import BlockNotFoundError, Environment
 from .envconfig import EnvConfig
@@ -16,10 +15,7 @@ from .loaders import (
 )
 from .rewriteloader import RewriteLoader
 from .configloaders import NestedDictLoader, TemplateFileLoader
-from .fsspecloaders import (
-    FsSpecFileSystemLoader,
-    FsSpecProtocolPathLoader,
-)
+from .fsspecloaders import FsSpecFileSystemLoader, FsSpecProtocolPathLoader
 from .loaderregistry import LoaderRegistry
 from .jinjafile import JinjaFile, JinjaItem
 
@@ -36,6 +32,8 @@ def get_loader_cls_by_id(loader_id: str):
     }
     return loaders[loader_id]
 
+
+____version__ = _metadata_version("jinjarope")
 
 __all__ = [
     "BlockNotFoundError",

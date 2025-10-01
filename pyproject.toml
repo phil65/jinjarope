@@ -1,11 +1,7 @@
-[tool.hatch.version]
-source = "regex_commit"
-commit_extra_args = ["-e"]
-path = "src/jinjarope/__init__.py"
-
 [build-system]
-requires = ["hatchling", "hatch-regex-commit"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.22"]
+build-backend = "uv_build"
+
 
 [project]
 name = "jinjarope"
@@ -14,7 +10,7 @@ authors = [
 ]
 description = "Jinja2 utilities, loaders & fsspec integration."
 readme = "README.md"
-dynamic = ["version"]
+version = "0.17.2"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
