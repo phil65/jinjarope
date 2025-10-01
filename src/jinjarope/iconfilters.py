@@ -422,9 +422,9 @@ def get_path_icon(path: str | os.PathLike[str]) -> str:
     Returns:
         iconify icon slug
     """
-    import upath
+    from upathtools import to_upath
 
-    path_obj = upath.UPath(path)
+    path_obj = to_upath(path)
 
     # Handle directories
     if path_obj.is_dir():
@@ -579,9 +579,9 @@ def get_path_ascii_icon(path: str | os.PathLike[str]) -> str:
     Returns:
         ASCII icon representing the file type
     """
-    import upath
+    from upathtools import to_upath
 
-    path_obj = upath.UPath(path)
+    path_obj = to_upath(path)
 
     # Handle symbolic links
     if path_obj.is_symlink():

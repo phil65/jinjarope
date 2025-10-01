@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal
 
 import jinja2
-import upath
 
 from jinjarope import envglobals, iterfilters, loaders, serializefilters, utils
 
@@ -106,7 +105,9 @@ class TemplateFileLoader(NestedDictLoader):
             sub_path: An optional tuple of keys describing the "dictionary path" inside
                       the file
         """
-        self.path = upath.UPath(path)
+        from upathtools import to_upath
+
+        self.path = to_upath(path)
         text = envglobals.load_file_cached(self.path)
         file_fmt = fmt if fmt else self.path.suffix.lstrip(".")
         assert file_fmt in ["json", "toml", "yaml", "ini"]

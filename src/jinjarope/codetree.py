@@ -12,6 +12,14 @@ from dataclasses import dataclass
 from enum import Enum, auto
 import inspect
 import os
+from typing import TYPE_CHECKING
+
+from upath.types import JoinablePath
+from upathtools import to_upath
+
+
+if TYPE_CHECKING:
+    from jinjarope.utils import AnyPath
 
 
 class NodeType(Enum):
@@ -113,7 +121,7 @@ def _should_include_node(name: str, options: TreeOptions) -> bool:
     return not (name.startswith("_") and not options.include_private)
 
 
-def parse_object(obj: os.PathLike[str] | str | type) -> Node:
+def parse_object(obj: AnyPath | type) -> Node:
     """Parse Python source code into a tree structure.
 
     Analyzes the AST of a Python file and creates a hierarchical representation
@@ -132,10 +140,8 @@ def parse_object(obj: os.PathLike[str] | str | type) -> Node:
         print(f"Found {len(root.children)} top-level definitions")
         ```
     """
-    import upath
-
-    if isinstance(obj, str | os.PathLike):
-        path = upath.UPath(obj)
+    if isinstance(obj, str | os.PathLike | JoinablePath):
+        path = to_upath(obj)
         content = path.read_text("utf-8")
         name = path.name
     else:

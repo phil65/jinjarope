@@ -95,9 +95,9 @@ class DirectoryTree:
             root_path: Root path of the directory tree.
             options: Options for directory tree printing.
         """
-        import upath
+        from upathtools import to_upath
 
-        self.root_path = upath.UPath(root_path)
+        self.root_path = to_upath(root_path)
         self.options = options or TreeOptions()
 
     def _get_sort_key(self, path: pathlib.Path) -> tuple[bool, Any]:

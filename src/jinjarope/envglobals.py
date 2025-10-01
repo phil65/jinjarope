@@ -14,12 +14,14 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     import os
 
+    from jinjarope.utils import AnyPath
+
 
 logger = logging.getLogger(__name__)
 
 
 @dec.cache_with_transforms(arg_transformers={0: lambda p: upath.UPath(p).resolve()})
-def load_file_cached(path: str | os.PathLike[str]) -> str:
+def load_file_cached(path: AnyPath) -> str:
     """Return the text-content of file at given path.
 
     Call is cached based on resolved file path.
@@ -28,7 +30,9 @@ def load_file_cached(path: str | os.PathLike[str]) -> str:
     Args:
         path: The path to get str content from
     """
-    return upath.UPath(path).read_text("utf-8")
+    from upathtools import to_upath
+
+    return to_upath(path).read_text("utf-8")
 
 
 _cache: dict[str, str] = {}

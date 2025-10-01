@@ -171,9 +171,9 @@ def contains_files(directory: str | os.PathLike[str]) -> bool:
     Args:
         directory: The directoy to check
     """
-    import upath
+    from upathtools import to_upath
 
-    path = upath.UPath(directory)
+    path = to_upath(directory)
     return path.exists() and any(path.iterdir())
 
 
