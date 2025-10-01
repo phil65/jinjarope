@@ -39,7 +39,7 @@ def deserialize(data: str, fmt: SerializeFormatStr, **kwargs: Any) -> Any:
 
 
 def dig(
-    data: dict,
+    data: dict[str, Any] | list[Any] | str,
     *sections: str,
     keep_path: bool = False,
     dig_yaml_lists: bool = True,
@@ -76,7 +76,7 @@ def dig(
                 return None
     if not keep_path:
         return data
-    result: dict[str, dict] = {}
+    result: dict[str, Any] = {}
     new = result
     for sect in sections:
         result[sect] = data if sect == sections[-1] else {}
@@ -85,11 +85,11 @@ def dig(
 
 
 def merge(
-    target: list | dict,
-    *source: list | dict,
+    target: list | dict[str, Any],
+    *source: list | dict[str, Any],
     deepcopy: bool = False,
     mergers: dict[type, Callable[[Any, Any, Any], Any]] | None = None,
-) -> list | dict:
+) -> list | dict[str, Any]:
     """Merge given data structures using mergers provided.
 
     Args:
