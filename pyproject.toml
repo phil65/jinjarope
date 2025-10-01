@@ -79,6 +79,7 @@ log_cli = true
 log_format = "%(asctime)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 addopts = "--cov=jinjarope/ --cov-report=term-missing --cov-report=xml"
+asyncio_mode = "auto"
 
 [tool.coverage.report]
 exclude_lines = [
