@@ -48,8 +48,8 @@ icons = ["pyconify"]
 yaml = ["yamling"]
 httpx = ["httpx"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     # lint
     "ruff",
     "mypy[faster-cache]",
