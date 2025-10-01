@@ -9,6 +9,8 @@ from jinjarope import icons
 if TYPE_CHECKING:
     import os
 
+    from jinjarope.utils import AnyPath
+
 
 class AsciiIcon(StrEnum):
     """ASCII icons for different file types."""
@@ -570,7 +572,7 @@ def get_pyconify_key(icon: str) -> str:
     return icon
 
 
-def get_path_ascii_icon(path: str | os.PathLike[str]) -> str:
+def get_path_ascii_icon(path: AnyPath) -> str:
     """Get an ASCII icon for a given file path based on its type.
 
     Args:
