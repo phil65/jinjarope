@@ -91,7 +91,7 @@ def fsspec_get(path: str | os.PathLike[str]) -> str:
     import fsspec
 
     with fsspec.open(path) as file:
-        return file.read().decode()
+        return file.read().decode()  # pyright: ignore[reportAttributeAccessIssue]
 
 
 T = TypeVar("T")
