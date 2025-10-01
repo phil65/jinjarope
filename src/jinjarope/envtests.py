@@ -61,7 +61,7 @@ def _to_set(value: Any) -> set[Any]:
     return set(value)
 
 
-def _to_tuple(value: Sequence[T]) -> tuple[T, ...]:
+def _to_tuple[T](value: Sequence[T]) -> tuple[T, ...]:
     """Convert value to tuple."""
     return tuple(value)
 

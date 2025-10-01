@@ -448,7 +448,7 @@ ContentType = TypeVar("ContentType", str, bytes)
 Position = Literal["body", "head", "end_head", "end_body"]
 
 
-def inject_javascript(
+def inject_javascript[ContentType: (str, bytes)](
     html_content: ContentType,
     javascript: str,
     *,

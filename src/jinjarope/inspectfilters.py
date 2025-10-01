@@ -27,7 +27,7 @@ HasCodeType = (
 
 
 @functools.cache
-def list_subclasses(
+def list_subclasses[ClassType: type](
     klass: ClassType,
     *,
     recursive: bool = True,
@@ -57,7 +57,7 @@ def list_subclasses(
     )
 
 
-def iter_subclasses(
+def iter_subclasses[ClassType: type](
     klass: ClassType,
     *,
     recursive: bool = True,
@@ -94,7 +94,7 @@ def iter_subclasses(
 
 
 @functools.cache
-def list_baseclasses(
+def list_baseclasses[ClassType: type](
     klass: ClassType,
     *,
     recursive: bool = True,
@@ -122,7 +122,7 @@ def list_baseclasses(
     )
 
 
-def iter_baseclasses(
+def iter_baseclasses[ClassType: type](
     klass: ClassType,
     *,
     recursive: bool = True,

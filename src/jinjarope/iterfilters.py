@@ -9,7 +9,7 @@ from typing import Any, TypeVar
 T = TypeVar("T")
 
 
-def pairwise(items: Iterable[T]) -> itertools.pairwise[tuple[T, T]]:
+def pairwise[T](items: Iterable[T]) -> itertools.pairwise[tuple[T, T]]:
     """Return an iterator of overlapping pairs taken from the input iterator.
 
     s -> (s0,s1), (s1,s2), (s2, s3), ...
@@ -20,7 +20,7 @@ def pairwise(items: Iterable[T]) -> itertools.pairwise[tuple[T, T]]:
     return itertools.pairwise(items)
 
 
-def chain(*iterables: Iterable[T]) -> itertools.chain[T]:
+def chain[T](*iterables: Iterable[T]) -> itertools.chain[T]:
     """Chain all given iterators.
 
     Make an iterator that returns elements from the first iterable until it is
@@ -67,7 +67,7 @@ def product(
     return itertools.product(*iterables, repeat=repeat)
 
 
-def repeat(obj: T, times: int | None = None) -> Iterable[T]:
+def repeat[T](obj: T, times: int | None = None) -> Iterable[T]:
     """Make an iterator that returns object over and over again.
 
     Runs indefinitely unless the times argument is specified.
@@ -104,7 +104,7 @@ def zip_longest(*iterables: Iterable[Any], fillvalue: Any = None) -> Iterable[An
     return itertools.zip_longest(*iterables, fillvalue)
 
 
-def islice(iterable: Iterable[T], *args: int | None) -> itertools.islice[T]:
+def islice[T](iterable: Iterable[T], *args: int | None) -> itertools.islice[T]:
     """Make an iterator that returns selected elements from the iterable.
 
     If start is non-zero, then elements from the iterable are skipped until start
@@ -136,7 +136,7 @@ def islice(iterable: Iterable[T], *args: int | None) -> itertools.islice[T]:
     return itertools.islice(iterable, *args)
 
 
-def do_zip(*items: Iterable[T]) -> zip[tuple[T, ...]]:
+def do_zip[T](*items: Iterable[T]) -> zip[tuple[T, ...]]:
     """Zip iterables into a single one.
 
     Args:
@@ -145,7 +145,7 @@ def do_zip(*items: Iterable[T]) -> zip[tuple[T, ...]]:
     return zip(*items)
 
 
-def reduce_list(items: Iterable[T]) -> list[T]:
+def reduce_list[T](items: Iterable[T]) -> list[T]:
     """Reduce duplicate items in a list and preserve order.
 
     Args:
@@ -174,7 +174,7 @@ def flatten_dict(dct: Mapping, sep: str = "/", _parent_key: str = "") -> Mapping
     return dict(items)
 
 
-def batched(iterable: Iterable[T], n: int) -> Generator[tuple[T, ...], None, None]:
+def batched[T](iterable: Iterable[T], n: int) -> Generator[tuple[T, ...], None, None]:
     """Batch data into tuples of length n. The last batch may be shorter.
 
     Note: this function was added to Py3.12 itertools
@@ -260,7 +260,7 @@ def groupby(
     return {k: list(g) for k, g in itertools.groupby(data, keyfunc)}
 
 
-def groupby_first_letter(
+def groupby_first_letter[T](
     data: Iterable[T],
     keyfunc: Callable[..., Any] | None = None,
 ) -> dict[str, list[T]]:
