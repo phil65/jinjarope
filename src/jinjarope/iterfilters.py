@@ -3,10 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable, Generator, Iterable, Mapping
 import itertools
 import operator
-from typing import Any, TypeVar
-
-
-T = TypeVar("T")
+from typing import Any
 
 
 def pairwise[T](items: Iterable[T]) -> itertools.pairwise[tuple[T, T]]:
@@ -196,7 +193,7 @@ def batched[T](iterable: Iterable[T], n: int) -> Generator[tuple[T, ...], None, 
         yield batch
 
 
-def natsort(
+def natsort[T](
     val: Iterable[T],
     key: str | Callable[[T], Any] | None = None,
     reverse: bool = False,
@@ -222,7 +219,7 @@ def natsort(
     return natsorted(val, key=key_fn, reverse=reverse, alg=alg)
 
 
-def groupby(
+def groupby[T](
     data: Iterable[T],
     key: Callable[[T], Any] | str | None = None,
     *,

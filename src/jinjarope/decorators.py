@@ -1,18 +1,14 @@
 from __future__ import annotations
 
 from functools import wraps
-from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any
 
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-P = ParamSpec("P")
-R = TypeVar("R")
-
-
-def cache_with_transforms(
+def cache_with_transforms[**P, R](
     *,
     arg_transformers: dict[int, Callable[[Any], Any]] | None = None,
     kwarg_transformers: dict[str, Callable[[Any], Any]] | None = None,

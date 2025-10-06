@@ -7,12 +7,9 @@ import math
 import os
 import re
 import sys
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 from jinjarope import utils
-
-
-T = TypeVar("T")
 
 
 if TYPE_CHECKING:

@@ -94,9 +94,6 @@ def fsspec_get(path: str | os.PathLike[str]) -> str:
         return file.read().decode()  # pyright: ignore[reportAttributeAccessIssue]
 
 
-T = TypeVar("T")
-
-
 @functools.lru_cache(maxsize=1)
 def _get_black_formatter() -> Callable[[str, int], str]:
     """Return a formatter.
