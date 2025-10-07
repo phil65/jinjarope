@@ -1,6 +1,6 @@
 [project]
 name = "jinjarope"
-version = "0.17.2"
+version = "1.0.0"
 description = "Jinja2 utilities, loaders & fsspec integration."
 readme = "README.md"
 requires-python = ">=3.13"
