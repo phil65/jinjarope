@@ -174,7 +174,7 @@ def flatten_dict(dct: Mapping, sep: str = "/", _parent_key: str = "") -> Mapping
 def batched[T](iterable: Iterable[T], n: int) -> Generator[tuple[T, ...], None, None]:
     """Batch data into tuples of length n. The last batch may be shorter.
 
-    Note: this function was added to Py3.12 itertools
+    Note: this function was added to Py3.13 itertools
 
     Examples:
         ``` py

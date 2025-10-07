@@ -1,8 +1,8 @@
 ## Code style
 
-You can assume Python 3.12.
+You can assume Python 3.13.
 Use newest language features if possible
-Adhere to pep8. 
+Adhere to pep8.
 Consider using pattern matching and walrus operators.
 
 ## Tests

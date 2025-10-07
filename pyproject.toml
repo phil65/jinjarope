@@ -3,7 +3,7 @@ name = "jinjarope"
 version = "0.17.2"
 description = "Jinja2 utilities, loaders & fsspec integration."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 license = "MIT"
 authors = [
   { name = "Philipp Temminghoff", email = "philipptemminghoff@gmail.com" },
@@ -22,18 +22,18 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Topic :: Internet",
   "Topic :: Software Development :: User Interfaces",
 ]
 dependencies = [
-    "anyenv>=0.4.17",
-    "fsspec",
-    "jinja2",
-    "universal_pathlib",
-    "upathtools",
+  "anyenv>=0.4.17",
+  "fsspec",
+  "jinja2",
+  "universal_pathlib",
+  "upathtools",
 ]
 
 [project.urls]
@@ -95,7 +95,7 @@ allowed-commit-types = [
 docstring-style = "google"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 # python_executable = ".venv/env/virtual/jinjarope/Scripts/python.exe"
 disable_error_code = ["misc", "import"]
 pretty = true
@@ -106,7 +106,7 @@ plugins = ["pydantic.mypy"]
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
-pythonVersion = "3.12"
+pythonVersion = "3.13"
 pythonPlatform = "All"
 typeCheckingMode = "basic"
 deprecateTypingAliases = true
@@ -133,7 +133,7 @@ asyncio_mode = "auto"
 [tool.ruff]
 line-length = 90
 extend-exclude = ["docs"]
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = [
