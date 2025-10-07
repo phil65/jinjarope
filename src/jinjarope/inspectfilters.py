@@ -7,12 +7,11 @@ import inspect
 import logging
 import pathlib
 import types
-from typing import Any, TypeVar
+from typing import Any
 
 
 logger = logging.getLogger(__name__)
 
-ClassType = TypeVar("ClassType", bound=type)
 
 HasCodeType = (
     types.ModuleType

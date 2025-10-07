@@ -5,7 +5,7 @@ import functools
 import importlib
 from importlib.metadata import entry_points as _entry_points
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, cast, overload
 
 from upath.types import JoinablePath
 
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-ClassType = TypeVar("ClassType", bound=type)
 type AnyPath = str | os.PathLike | JoinablePath
 
 
