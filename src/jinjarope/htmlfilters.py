@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import base64
 import functools
-import json
 import logging
 import posixpath
 import re
@@ -98,7 +97,9 @@ def format_js_map(mapping: dict | str, indent: int = 4) -> str:
         mapping: Dictionary to dump
         indent: The amount of indentation for the key-value pairs
     """
-    dct = json.loads(mapping) if isinstance(mapping, str) else mapping
+    import anyenv
+
+    dct = anyenv.load_json(mapping) if isinstance(mapping, str) else mapping
     rows: list[str] = []
     indent_str = " " * indent
     for k, v in dct.items():

@@ -25,7 +25,6 @@ fn = "jinjarope.textfilters.dirname_to_title"
 group = "format"
 icon = "mage:folder-2"
 
-
 [filters.dirname_to_title.examples.basic]
 template = """
 {{ "a_foldername" | dirname_to_title }}
@@ -307,7 +306,6 @@ template = """
 {{ "https://picsum.photos/100/100" | url_to_b64 }}
 """
 
-
 [filters.inject_javascript]
 fn = "jinjarope.htmlfilters.inject_javascript"
 group = "html"
@@ -317,6 +315,7 @@ icon = "mdi:source-code"
 template = """
 {{ "<body>some HTML</body>" | inject_javascript("var number = 1;") }}
 """
+
 [filters.inject_javascript.examples.with_position]
 template = """
 {{ "<head>HEAD</head><body>some HTML</body>" | inject_javascript("var number = 1;", position="head") }}
@@ -1045,7 +1044,6 @@ template = """
 {{ filters.get_file | get_file }}
 """
 
-
 [filters.get_structure_map]
 fn = "jinjarope.codetree.get_structure_map"
 group = "inspect"
@@ -1056,7 +1054,6 @@ markdown = true
 template = """
 {{ "jinjarope.codetree" | import_module | get_structure_map }}
 """
-
 
 # Icons
 

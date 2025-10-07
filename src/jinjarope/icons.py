@@ -88,10 +88,11 @@ def write_icon_index():
 def load_icon_index() -> dict[str, dict[str, str]]:
     """Load the complete icon index from disk."""
     import gzip
-    import json
+
+    import anyenv
 
     with gzip.open(ICON_FILE, "r") as file:
-        return json.loads(file.read())
+        return anyenv.load_json(file.read())
 
 
 if __name__ == "__main__":

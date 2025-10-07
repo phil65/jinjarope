@@ -28,7 +28,13 @@ classifiers = [
   "Topic :: Internet",
   "Topic :: Software Development :: User Interfaces",
 ]
-dependencies = ["fsspec", "jinja2", "universal_pathlib", "upathtools"]
+dependencies = [
+    "anyenv>=0.4.17",
+    "fsspec",
+    "jinja2",
+    "universal_pathlib",
+    "upathtools",
+]
 
 [project.urls]
 Documentation = "https://phil65.github.io/jinjarope/"
