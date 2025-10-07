@@ -251,3 +251,6 @@ combine-as-imports = true
 [tool.ruff.format]
 # Enable preview style formatting.
 preview = true
+
+[tool.uv]
+default-groups = ["dev", "lint", "docs"]
