@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 import types
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import jinja2
 
@@ -228,7 +228,7 @@ class DictLoader(LoaderMixin, jinja2.DictLoader):
 
 
 def from_json(
-    dct_or_list: dict | list | None | jinja2.BaseLoader,
+    dct_or_list: dict[str, Any] | list[Any] | None | jinja2.BaseLoader,
 ) -> jinja2.BaseLoader | None:
     """Create a loader based on a json representation.
 

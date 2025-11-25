@@ -90,7 +90,7 @@ def html_link(text: str | None = None, link: str | None = None, **kwargs: Any) -
     return f"<a href={link!r}{attr_str}>{text or link}</a>"
 
 
-def format_js_map(mapping: dict | str, indent: int = 4) -> str:
+def format_js_map(mapping: dict[str, Any] | str, indent: int = 4) -> str:
     """Return JS map str for given dictionary.
 
     Args:
