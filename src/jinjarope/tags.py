@@ -267,7 +267,5 @@ if __name__ == "__main__":
     HMACExtension = create_tag_extension("container", "hmac", render)
 
     env = jinja2.Environment(extensions=[HMACExtension])
-    template = env.from_string(
-        "{% hmac 'SECRET', digest='sha1' %}Hello world!{% endhmac %}"
-    )
+    template = env.from_string("{% hmac 'SECRET', digest='sha1' %}Hello world!{% endhmac %}")
     print(template.render())

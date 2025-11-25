@@ -27,9 +27,7 @@ get_loader = registry.get_loader
 def get_loader_cls_by_id(loader_id: str):
     from . import inspectfilters
 
-    loaders = {
-        i.ID: i for i in inspectfilters.list_subclasses(LoaderMixin) if "ID" in i.__dict__
-    }
+    loaders = {i.ID: i for i in inspectfilters.list_subclasses(LoaderMixin) if "ID" in i.__dict__}
     return loaders[loader_id]
 
 

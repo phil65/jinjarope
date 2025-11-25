@@ -146,11 +146,7 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
         )
 
     def __hash__(self):
-        return (
-            hash(tuple(sorted(self.storage_options.items())))
-            + hash(self.fs)
-            + hash(self.path)
-        )
+        return hash(tuple(sorted(self.storage_options.items()))) + hash(self.fs) + hash(self.path)
 
     def list_templates(self) -> list[str]:
         return [

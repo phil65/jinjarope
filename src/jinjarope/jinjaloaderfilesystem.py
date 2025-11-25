@@ -124,9 +124,7 @@ class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):
         return self.cat_file(path, **kwargs)
 
     @override
-    def ls(
-        self, path: str, detail: bool = True, **kwargs: Any
-    ) -> list[dict[str, str]] | list[str]:
+    def ls(self, path: str, detail: bool = True, **kwargs: Any) -> list[dict[str, str]] | list[str]:
         """List contents of path.
 
         Args:
@@ -153,15 +151,11 @@ class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):
             return self._list_root(templates, detail)
         return self._list_subdirectory(templates, clean_path, detail)
 
-    def _list_root(
-        self, templates: list[str], detail: bool
-    ) -> list[dict[str, str]] | list[str]:
+    def _list_root(self, templates: list[str], detail: bool) -> list[dict[str, str]] | list[str]:
         """List contents of root directory."""
         root_files = [path for path in templates if "/" not in path]
         root_dirs = {
-            path.split("/")[0]
-            for path in templates
-            if "/" in path and path not in root_files
+            path.split("/")[0] for path in templates if "/" in path and path not in root_files
         }
 
         if detail:
@@ -175,9 +169,7 @@ class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):
     ) -> list[dict[str, str]] | list[str]:
         """List contents of a subdirectory."""
         # Get all templates that start with the path
-        relevant_templates = [
-            template for template in templates if template.startswith(f"{path}/")
-        ]
+        relevant_templates = [template for template in templates if template.startswith(f"{path}/")]
 
         if not relevant_templates:
             msg = f"Directory not found: {path}"
@@ -200,10 +192,7 @@ class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):
                     # If there's no extension or if it appears in the full paths
                     # with something after it, it's a directory
                     "type": "directory"
-                    if (
-                        "." not in item
-                        or any(t.startswith(f"{path}/{item}/") for t in templates)
-                    )
+                    if ("." not in item or any(t.startswith(f"{path}/{item}/") for t in templates))
                     else "file",
                 }
                 for item in sorted_items

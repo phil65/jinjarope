@@ -130,9 +130,7 @@ def _get_merged_translations(
     merged_translations: NullTranslations | None = None
 
     logger.debug("Looking for translations for locale %r", locale)
-    locale_str = (
-        f"{locale.language}_{locale.territory}" if locale.territory else locale.language
-    )
+    locale_str = f"{locale.language}_{locale.territory}" if locale.territory else locale.language
     for theme_dir in reversed(dirs):
         dirname = pathlib.Path(theme_dir) / locales_dir
         translations = Translations.load(dirname, [locale_str])

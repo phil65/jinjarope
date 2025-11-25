@@ -336,13 +336,9 @@ if __name__ == "__main__":
     parser.add_argument("file", help="Path to the Python file")
     parser.add_argument("--no-types", action="store_true", help="Don't show node types")
     parser.add_argument("--line-numbers", action="store_true", help="Show line numbers")
-    parser.add_argument(
-        "--no-decorators", action="store_true", help="Don't show decorators"
-    )
+    parser.add_argument("--no-decorators", action="store_true", help="Don't show decorators")
     parser.add_argument("--sort", action="store_true", help="Sort nodes alphabetically")
-    parser.add_argument(
-        "--no-private", action="store_true", help="Don't include private members"
-    )
+    parser.add_argument("--no-private", action="store_true", help="Don't include private members")
     parser.add_argument("--dunder", action="store_true", help="Include dunder methods")
     parser.add_argument("--depth", type=int, help="Maximum depth to display")
     parser.add_argument(

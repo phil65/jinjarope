@@ -37,10 +37,7 @@ def test_nested_dict_repr():
         },
     }
     loader = configloaders.NestedDictLoader(templates)
-    assert (
-        repr(loader)
-        == "NestedDictLoader(mapping={'example': {'template': '{{ something }}'}})"
-    )
+    assert repr(loader) == "NestedDictLoader(mapping={'example': {'template': '{{ something }}'}})"
 
 
 def test_nested_dict_list_templates():

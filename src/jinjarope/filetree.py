@@ -143,10 +143,7 @@ class DirectoryTree:
 
         return not (
             self.options.allowed_extensions
-            and (
-                path.is_file()
-                and path.suffix.lower() not in self.options.allowed_extensions
-            )
+            and (path.is_file() and path.suffix.lower() not in self.options.allowed_extensions)
         )
 
     def _is_directory_empty_after_filters(
@@ -263,9 +260,7 @@ class DirectoryTree:
             raise FileNotFoundError(msg)
 
         # Check if root directory is empty after filtering
-        if self.options.hide_empty and self._is_directory_empty_after_filters(
-            self.root_path
-        ):
+        if self.options.hide_empty and self._is_directory_empty_after_filters(self.root_path):
             icon = self.DIRECTORY if self.options.show_icons else ""
             yield f"{icon} {self.root_path.name} (empty)"
             return
@@ -279,11 +274,7 @@ class DirectoryTree:
             # Prepare icon
             icon = ""
             if self.options.show_icons:
-                icon = (
-                    self.DIRECTORY
-                    if info["is_dir"]
-                    else iconfilters.get_path_ascii_icon(path)
-                )
+                icon = self.DIRECTORY if info["is_dir"] else iconfilters.get_path_ascii_icon(path)
 
             # Prepare additional information
             details: list[str] = []

@@ -35,9 +35,7 @@ class EncryptTag(ContainerTag):
 
     tags = {"encrypt"}  # noqa: RUF012
 
-    def render(
-        self, secret: str, digest: str = "sha256", caller: Any | None = None
-    ) -> str:
+    def render(self, secret: str, digest: str = "sha256", caller: Any | None = None) -> str:
         if caller is None:
             return ""
 
@@ -113,9 +111,7 @@ def test_alert_tag_with_type(env: Environment):
 
 def test_encrypt_tag(env: Environment):
     """Test EncryptTag encrypts content correctly."""
-    template = env.from_string(
-        '{% encrypt "secret", digest="sha1" %}test content{% endencrypt %}'
-    )
+    template = env.from_string('{% encrypt "secret", digest="sha1" %}test content{% endencrypt %}')
     result = template.render()
 
     # Test that output is a valid hex string

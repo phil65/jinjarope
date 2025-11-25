@@ -68,9 +68,7 @@ class Environment(jinja2.Environment):
         trim_blocks: bool = True,
         cache_size: int = -1,
         auto_reload: bool = False,
-        loader: (
-            jinja2.BaseLoader | list[jinja2.BaseLoader] | dict | list[dict] | None
-        ) = None,
+        loader: (jinja2.BaseLoader | list[jinja2.BaseLoader] | dict | list[dict] | None) = None,
         block_start_string: str = BLOCK_START_STRING,
         block_end_string: str = BLOCK_END_STRING,
         variable_start_string: str = VARIABLE_START_STRING,
@@ -476,9 +474,7 @@ class Environment(jinja2.Environment):
         Returns:
             True if the rendered string is truthy, False otherwise.
         """
-        result = await self.render_string_async(
-            string=string, variables=variables, **kwargs
-        )
+        result = await self.render_string_async(string=string, variables=variables, **kwargs)
         return result not in ["None", "False", ""]
 
     def render_string(
@@ -765,8 +761,7 @@ class Environment(jinja2.Environment):
         exts = [
             k
             for k in self.extensions
-            if k
-            not in ["jinja2.ext.LoopControlExtension", "jinja2.ext.ExprStmtExtension"]
+            if k not in ["jinja2.ext.LoopControlExtension", "jinja2.ext.ExprStmtExtension"]
         ]
         return envconfig.EnvConfig(
             block_start_string=self.block_start_string,
@@ -830,8 +825,7 @@ class BlockNotFoundError(Exception):
         self.block_name = block_name
         self.template_name = template_name
         super().__init__(
-            message
-            or f"Block {self.block_name!r} not found in template {self.template_name!r}",
+            message or f"Block {self.block_name!r} not found in template {self.template_name!r}",
         )
 
 

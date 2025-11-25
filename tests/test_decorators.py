@@ -61,9 +61,7 @@ def test_unhashable_args():
 def test_mixed_args_kwargs():
     """Test caching with both positional and keyword arguments."""
 
-    @cache_with_transforms(
-        arg_transformers={0: str.lower}, kwarg_transformers={"items": tuple}
-    )
+    @cache_with_transforms(arg_transformers={0: str.lower}, kwarg_transformers={"items": tuple})
     def process_data(prefix: str, *, items: list[int]) -> str:
         return f"{prefix}: {sum(items)}"
 
