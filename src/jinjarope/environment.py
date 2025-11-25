@@ -181,7 +181,7 @@ class Environment(jinja2.Environment):
         self.add_extension("jinja2.ext.loopcontrols")
         self.add_extension("jinja2.ext.do")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         cfg = self.get_config()
         return utils.get_repr(self, **utils.get_dataclass_nondefault_values(cfg))
 

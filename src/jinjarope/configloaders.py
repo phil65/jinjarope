@@ -44,7 +44,7 @@ class NestedDictLoader(loaders.LoaderMixin, jinja2.BaseLoader):
         super().__init__()
         self._data = mapping
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, mapping=self._data)
 
     def list_templates(self) -> list[str]:
@@ -117,7 +117,7 @@ class TemplateFileLoader(NestedDictLoader):
         super().__init__(mapping=mapping)
         self._data = mapping
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         path = self.path.as_posix()
         return utils.get_repr(self, path=path)
 

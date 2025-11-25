@@ -78,7 +78,7 @@ class FsSpecProtocolPathLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
         else:
             return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self)
 
 
@@ -134,7 +134,7 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
                 self.fs, self.path = fs, ""
         self.storage_options = kwargs
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, fs=self.fs)
 
     def __eq__(self, other):

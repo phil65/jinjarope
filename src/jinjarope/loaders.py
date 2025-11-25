@@ -58,7 +58,7 @@ class PrefixLoader(LoaderMixin, jinja2.PrefixLoader):
 
     ID = "prefix"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, self.mapping)
 
     def __eq__(self, other):
@@ -67,7 +67,7 @@ class PrefixLoader(LoaderMixin, jinja2.PrefixLoader):
     def __hash__(self):
         return hash(tuple(sorted(self.mapping.items())))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.mapping)
 
     def __iter__(self):
@@ -82,7 +82,7 @@ class ModuleLoader(LoaderMixin, jinja2.ModuleLoader):
 
     ID = "module"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, path=self.module.__path__)
 
     def __eq__(self, other):
@@ -105,7 +105,7 @@ class FunctionLoader(LoaderMixin, jinja2.FunctionLoader):
 
     ID = "function"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, self.load_func)
 
     def __eq__(self, other):
@@ -144,7 +144,7 @@ class PackageLoader(LoaderMixin, jinja2.PackageLoader):
             path = (pathlib.Path(path) / package_path).as_posix()
         super().__init__(parts[0], path, encoding)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(
             self,
             package_name=self.package_name,
@@ -167,14 +167,14 @@ class FileSystemLoader(LoaderMixin, jinja2.FileSystemLoader):
 
     ID = "filesystem"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, searchpath=self.searchpath)
 
     def __add__(self, other) -> FileSystemLoader:
         ls = [other] if isinstance(other, jinja2.FileSystemLoader) else other.serchpath
         return FileSystemLoader([*self.searchpath, *ls])  # pyright: ignore
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return len(self.searchpath) > 0
 
     def __eq__(self, other):
@@ -189,10 +189,10 @@ class ChoiceLoader(LoaderMixin, jinja2.ChoiceLoader):
 
     ID = "choice"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, loaders=self.loaders)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return len(self.loaders) > 0
 
     def __eq__(self, other):
@@ -210,7 +210,7 @@ class DictLoader(LoaderMixin, jinja2.DictLoader):
 
     ID = "dict"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, mapping=self.mapping)
 
     def __add__(self, other: dict[str, str] | jinja2.DictLoader) -> DictLoader:

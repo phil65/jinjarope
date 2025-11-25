@@ -255,7 +255,7 @@ if __name__ == "__main__":
 
     import jinja2
 
-    def render(secret, digest="sha256", caller=None):
+    def render(secret, digest: str = "sha256", caller=None):
         content = str(caller()).encode()
 
         if isinstance(secret, str):

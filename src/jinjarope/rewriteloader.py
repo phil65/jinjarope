@@ -34,7 +34,7 @@ class RewriteLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
         self.loader = loader
         self.rewrite_fn = rewrite_fn
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, self.loader, self.rewrite_fn)
 
     def __eq__(self, other):

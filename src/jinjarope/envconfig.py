@@ -52,7 +52,7 @@ class EnvConfig:
     )
     """A list of jinja2 extentions."""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, **self.as_dict())
 
     def as_dict(self) -> dict[str, Any]:

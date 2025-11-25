@@ -128,7 +128,7 @@ class JinjaItem:
     aliases: list[str] = dataclasses.field(default_factory=list)
     required_packages: list[str] = dataclasses.field(default_factory=list)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return utils.get_repr(self, self.identifier)
 
     @property

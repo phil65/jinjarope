@@ -25,7 +25,7 @@ except ImportError:  # pragma: no cover
         language: str
         territory: str = ""
 
-        def __str__(self):
+        def __str__(self) -> str:
             if self.territory:
                 return f"{self.language}_{self.territory}"
             return self.language
