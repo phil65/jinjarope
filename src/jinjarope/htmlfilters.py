@@ -47,12 +47,7 @@ ANSI_STYLES = {
 }
 
 
-def wrap_in_elem(
-    text: str | None,
-    tag: str,
-    add_linebreaks: bool = False,
-    **kwargs: Any,
-) -> str:
+def wrap_in_elem(text: str | None, tag: str, add_linebreaks: bool = False, **kwargs: Any) -> str:
     """Wrap given text in an HTML/XML tag (with attributes).
 
     If text is empty, just return an empty string.

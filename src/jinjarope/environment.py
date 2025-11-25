@@ -774,7 +774,7 @@ class Environment(jinja2.Environment):
             line_comment_prefix=self.line_comment_prefix,
             trim_blocks=self.trim_blocks,
             lstrip_blocks=self.lstrip_blocks,
-            newline_sequence=self.newline_sequence,
+            newline_sequence=self.newline_sequence,  # pyright: ignore[reportArgumentType]
             keep_trailing_newline=self.keep_trailing_newline,
             loader=self.loader,
             undefined=self.undefined,
