@@ -5,7 +5,7 @@ import functools
 import importlib
 from importlib.metadata import entry_points as _entry_points
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol, cast, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, overload
 
 from upath.types import JoinablePath
 
@@ -147,7 +147,6 @@ def get_hash(obj: Any, hash_length: int | None = 7) -> str:
 def resolve(
     name: str,
     module: str | None = None,
-    *,
     py_type: None = None,
 ) -> Any: ...
 
@@ -161,7 +160,6 @@ def resolve[T](
 ) -> T: ...
 
 
-@functools.cache
 def resolve[T](
     name: str,
     module: str | None = None,
@@ -226,7 +224,7 @@ def resolve[T](
         msg = f"Expected {py_type.__name__}, but {name} is {type(found).__name__}"
         raise TypeError(msg)
 
-    return cast(T, found) if py_type is not None else found
+    return found
 
 
 if __name__ == "__main__":

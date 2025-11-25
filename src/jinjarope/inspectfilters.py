@@ -93,14 +93,14 @@ def iter_subclasses[ClassType: type](
 
 
 @functools.cache
-def list_baseclasses[ClassType: type](
-    klass: ClassType,
+def list_baseclasses(
+    klass: type,
     *,
     recursive: bool = True,
     filter_abstract: bool = False,
     filter_generic: bool = True,
     filter_locals: bool = True,
-) -> list[ClassType]:
+) -> list[type]:
     """Return list of all baseclasses of given klass.
 
     Args:
@@ -121,14 +121,14 @@ def list_baseclasses[ClassType: type](
     )
 
 
-def iter_baseclasses[ClassType: type](
-    klass: ClassType,
+def iter_baseclasses(
+    klass: type,
     *,
     recursive: bool = True,
     filter_abstract: bool = False,
     filter_generic: bool = True,
     filter_locals: bool = True,
-) -> Iterator[ClassType]:
+) -> Iterator[type]:
     """(Recursively) iterate all baseclasses of given klass.
 
     Args:
