@@ -22,7 +22,7 @@ class RewriteLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
 
     ID = "rewrite"
 
-    def __init__(self, loader: jinja2.BaseLoader, rewrite_fn: Callable[[str, str], str]):
+    def __init__(self, loader: jinja2.BaseLoader, rewrite_fn: Callable[[str, str], str]) -> None:
         """Instanciate the RewriteLoader.
 
         Args:

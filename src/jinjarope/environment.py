@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 
 class Context(jinja2.runtime.Context):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Context()"
 
 
@@ -88,7 +88,7 @@ class Environment(jinja2.Environment):
         autoescape: bool | Callable[[str | None], bool] = False,
         bytecode_cache: jinja2.BytecodeCache | None = None,
         enable_async: bool = False,
-    ):
+    ) -> None:
         """Initialize an enhanced Jinja environment with custom settings.
 
         Args:
@@ -209,7 +209,7 @@ class Environment(jinja2.Environment):
         """
         return self.get_template(val)
 
-    def install_translations(self, locale: str, dirs: Sequence[str | os.PathLike[str]]):
+    def install_translations(self, locale: str, dirs: Sequence[str | os.PathLike[str]]) -> None:
         """Install translations for the environment.
 
         This function installs translations for the given locale
@@ -224,7 +224,7 @@ class Environment(jinja2.Environment):
 
         localization.install_translations(self, locale, dirs)
 
-    def set_undefined(self, value: undefined_.UndefinedStr | type[jinja2.Undefined]):
+    def set_undefined(self, value: undefined_.UndefinedStr | type[jinja2.Undefined]) -> None:
         """Set the undefined behaviour for the environment.
 
         Args:
@@ -242,7 +242,7 @@ class Environment(jinja2.Environment):
         load_functions: bool = True,
         load_config: bool = True,
         load_loader: bool = True,
-    ):
+    ) -> None:
         """Load the content of a JinjaFile and add it to the environment.
 
         This function reads a JinjaFile and adds its filters, tests,
@@ -358,7 +358,7 @@ class Environment(jinja2.Environment):
 
         return cached
 
-    def inherit_from(self, env: jinja2.Environment):
+    def inherit_from(self, env: jinja2.Environment) -> None:
         """Inherit complete configuration from another environment.
 
         This function copies all settings and configuration from another
@@ -372,7 +372,7 @@ class Environment(jinja2.Environment):
         self.linked_to = env
         self.overlayed = True
 
-    def add_template(self, file: str | os.PathLike[str]):
+    def add_template(self, file: str | os.PathLike[str]) -> None:
         """Add a new template during runtime.
 
         This function adds a new template to the environment during
@@ -397,7 +397,7 @@ class Environment(jinja2.Environment):
         new_loader = loaders.DictLoader({file: content})
         self._add_loader(new_loader)
 
-    def add_template_path(self, *path: str | os.PathLike[str]):
+    def add_template_path(self, *path: str | os.PathLike[str]) -> None:
         """Add a new template path during runtime.
 
         This function adds a new template path to the environment
@@ -418,7 +418,7 @@ class Environment(jinja2.Environment):
     def _add_loader(
         self,
         new_loader: jinja2.BaseLoader | dict[str, str] | str | os.PathLike[str],
-    ):
+    ) -> None:
         """Add a new loader to the current environment."""
         match new_loader:
             case dict():
@@ -698,7 +698,7 @@ class Environment(jinja2.Environment):
         module_paths: list[str] | None = None,
         static: dict[str, str] | None = None,
         fsspec_paths: bool = True,
-    ):
+    ) -> None:
         """Set the loader for the environment.
 
         This function sets the loader for the environment based on
@@ -811,7 +811,7 @@ class Environment(jinja2.Environment):
         import collections
 
         class GlobalsMap(collections.ChainMap):
-            def __repr__(self):
+            def __repr__(self) -> str:
                 return f"GlobalsMap<{len(self)} keys>"
 
         return GlobalsMap(d, self.globals)
@@ -825,7 +825,7 @@ class BlockNotFoundError(Exception):
         block_name: str,
         template_name: str,
         message: str | None = None,
-    ):
+    ) -> None:
         """Initialize the exception."""
         self.block_name = block_name
         self.template_name = template_name

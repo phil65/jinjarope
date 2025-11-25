@@ -151,7 +151,7 @@ def format_css_rule(dct: Mapping) -> str:
     """
     data: dict[str, list] = {}
 
-    def _parse(obj, selector: str = ""):
+    def _parse(obj, selector: str = "") -> None:
         for key, value in obj.items():
             if hasattr(value, "items"):
                 rule = selector + " " + key

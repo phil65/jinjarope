@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 
 
 class NoBabelExtension(InternationalizationExtension):
-    def __init__(self, environment: jinja2.Environment):
+    def __init__(self, environment: jinja2.Environment) -> None:
         Extension.__init__(self, environment)
         environment.extend(
             install_null_translations=self._install_null,
@@ -85,7 +85,7 @@ def parse_locale(locale: str) -> Locale:
 
 def install_translations(
     env: jinja2.Environment, locale: str | Locale, dirs: Sequence[str | os.PathLike[str]]
-):
+) -> None:
     """Install translations for the given locale in the Jinja environment.
 
     Args:

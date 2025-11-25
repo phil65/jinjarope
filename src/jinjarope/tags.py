@@ -24,7 +24,7 @@ __version__ = "0.6.1"
 class BaseTemplateTag(Extension):
     """Base class for template tag extensions providing common functionality."""
 
-    def __init__(self, environment: Environment):
+    def __init__(self, environment: Environment) -> None:
         super().__init__(environment)
         self.context: Context | None = None
         self.template: str | None = None
@@ -48,7 +48,7 @@ class BaseTemplateTag(Extension):
         options["tag_name"] = tag_name
         return self.create_node(parser, args, kwargs, lineno=lineno, **options)
 
-    def init_parser(self, parser: Parser):
+    def init_parser(self, parser: Parser) -> None:
         """Initialize parser by skipping the tag name."""
         parser.stream.skip(1)
 

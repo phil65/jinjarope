@@ -25,7 +25,7 @@ def _load(txt: str) -> dict[str, Any]:
 class JinjaFile(dict[str, Any]):
     """A file defining filters / tests."""
 
-    def __init__(self, path: str | os.PathLike[str]):
+    def __init__(self, path: str | os.PathLike[str]) -> None:
         """Instanciate the file.
 
         Args:

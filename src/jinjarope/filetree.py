@@ -89,7 +89,7 @@ class DirectoryTree:
         self,
         root_path: str | os.PathLike[str],
         options: TreeOptions | None = None,
-    ):
+    ) -> None:
         """A class to generate and print directory tree structure.
 
         Attributes:
@@ -372,7 +372,7 @@ def get_directory_tree(
     return DirectoryTree(root_path, options).get_tree_text()
 
 
-def main():
+def main() -> None:
     # Example usage with various options
     options = TreeOptions(
         show_hidden=False,

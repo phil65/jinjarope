@@ -75,7 +75,7 @@ def _get_pyconify_icon_index(*collections: str) -> dict[str, dict[str, str]]:
     return index
 
 
-def write_icon_index():
+def write_icon_index() -> None:
     """Fetch the complete icon index and write it gzipped to disk."""
     import gzip
     import json

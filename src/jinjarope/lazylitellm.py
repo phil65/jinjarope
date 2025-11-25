@@ -12,7 +12,7 @@ class LazyLiteLLM:
         self._load_litellm()
         return getattr(self._lazy_module, name)
 
-    def _load_litellm(self):
+    def _load_litellm(self) -> None:
         if self._lazy_module is not None:
             return
 

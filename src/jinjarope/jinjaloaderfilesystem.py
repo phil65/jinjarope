@@ -19,7 +19,7 @@ class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):
     protocol = "jinja"
     async_impl = True
 
-    def __init__(self, env: jinja2.Environment):
+    def __init__(self, env: jinja2.Environment) -> None:
         """Initialize a JinjaLoader filesystem.
 
         Args:

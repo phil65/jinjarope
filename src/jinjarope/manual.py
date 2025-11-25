@@ -53,7 +53,7 @@ class Build:
         nav += dev_section.nav
         return nav
 
-    def add_sections(self):
+    def add_sections(self) -> None:
         sections: dict[str, list[jinjafile.JinjaItem]] = {
             "Filters": [],
             "Tests": [],

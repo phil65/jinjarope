@@ -35,7 +35,7 @@ class NestedDictLoader(loaders.LoaderMixin, jinja2.BaseLoader):
 
     ID = "nested_dict"
 
-    def __init__(self, mapping: NestedMapping):
+    def __init__(self, mapping: NestedMapping) -> None:
         """Constructor.
 
         Args:
@@ -96,7 +96,7 @@ class TemplateFileLoader(NestedDictLoader):
         path: str | os.PathLike[str],
         fmt: Literal["toml", "json", "ini", "yaml"] | None = None,
         sub_path: tuple[str, ...] | None = None,
-    ):
+    ) -> None:
         """Constructor.
 
         Args:

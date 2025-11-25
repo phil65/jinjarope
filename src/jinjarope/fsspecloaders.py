@@ -37,7 +37,7 @@ class FsSpecProtocolPathLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
 
     ID = "fsspec_protocol_path"
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return type(self) is type(other)
 
     def __hash__(self):
@@ -70,7 +70,7 @@ class FsSpecProtocolPathLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
     def list_templates(self) -> list[str]:
         return []
 
-    def __contains__(self, path: str):
+    def __contains__(self, path: str) -> bool:
         try:
             self.get_source(None, path)
         except jinja2.TemplateNotFound:
@@ -113,7 +113,7 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
 
     ID = "fsspec"
 
-    def __init__(self, fs: fsspec.AbstractFileSystem | str, **kwargs: Any):
+    def __init__(self, fs: fsspec.AbstractFileSystem | str, **kwargs: Any) -> None:
         """Constructor.
 
         Args:

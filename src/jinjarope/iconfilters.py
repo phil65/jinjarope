@@ -449,7 +449,7 @@ def get_favicon(
         "google", "duckduckgo", "iconhorse", "yandex", "favicon_io", "favicon_ninja"
     ] = "duckduckgo",
     size: int = 32,
-):
+) -> str:
     """Return a favicon URL for the given URL.
 
     Args:

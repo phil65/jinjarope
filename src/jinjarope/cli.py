@@ -60,7 +60,7 @@ def render(
         help=TRIM_HELP,
         show_default=False,
     ),
-):
+) -> None:
     """Render a Jinja template.
 
     Args:
