@@ -136,7 +136,7 @@ def clean_svg(text: str) -> str:
     return text.strip()
 
 
-def format_css_rule(dct: Mapping) -> str:
+def format_css_rule(dct: Mapping[str, Any]) -> str:
     """Format a nested dictionary as CSS rule.
 
     Mapping must be of shape {".a": {"b": "c"}}
@@ -146,7 +146,7 @@ def format_css_rule(dct: Mapping) -> str:
     """
     data: dict[str, list] = {}
 
-    def _parse(obj, selector: str = "") -> None:
+    def _parse(obj: Mapping[str, Any], selector: str = "") -> None:
         for key, value in obj.items():
             if hasattr(value, "items"):
                 rule = selector + " " + key
