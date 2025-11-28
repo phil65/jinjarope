@@ -503,7 +503,11 @@ class Environment(jinja2.Environment):
         except TemplateSyntaxError as e:
             msg = f"Error when evaluating \n{string}\n (extra globals: {variables})"
             raise SyntaxError(msg) from e
-        return template.render(**variables)
+        try:
+            return template.render(**variables)
+        except Exception as e:
+            msg = f"Error when rendering \n{string}\n (extra globals: {variables})"
+            raise RuntimeError(msg) from e
 
     async def render_string_async(
         self,
@@ -531,7 +535,11 @@ class Environment(jinja2.Environment):
         except TemplateSyntaxError as e:
             msg = f"Error when evaluating \n{string}\n (extra globals: {variables})"
             raise SyntaxError(msg) from e
-        return await template.render_async(**variables)
+        try:
+            return await template.render_async(**variables)
+        except Exception as e:
+            msg = f"Error when rendering \n{string}\n (extra globals: {variables})"
+            raise RuntimeError(msg) from e
 
     def render_file(
         self,
