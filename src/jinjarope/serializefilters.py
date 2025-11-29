@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 from jinjarope import deepmerge
 
@@ -82,6 +82,24 @@ def dig(
         result[sect] = data if sect == sections[-1] else {}
         result = result[sect]
     return new
+
+
+@overload
+def merge(
+    target: dict[str, Any],
+    *source: dict[str, Any],
+    deepcopy: bool = False,
+    mergers: dict[type, Callable[[Any, Any, Any], Any]] | None = None,
+) -> dict[str, Any]: ...
+
+
+@overload
+def merge(
+    target: list[Any],
+    *source: list[Any],
+    deepcopy: bool = False,
+    mergers: dict[type, Callable[[Any, Any, Any], Any]] | None = None,
+) -> list[Any]: ...
 
 
 def merge(
