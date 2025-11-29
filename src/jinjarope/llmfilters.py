@@ -5,14 +5,8 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-# import litellm
-from jinjarope import lazylitellm
-
 
 load_dotenv()
-
-
-litellm = lazylitellm.LazyLiteLLM()
 
 
 def llm_generate_image(
@@ -40,6 +34,8 @@ def llm_generate_image(
     Returns:
         The generated image response.
     """
+    import litellm
+
     response = litellm.image_generation(
         prompt=prompt,
         model=model or os.getenv("OPENAI_IMAGE_MODEL"),
