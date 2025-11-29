@@ -99,7 +99,6 @@ docstring-style = "google"
 [tool.mypy]
 python_version = "3.13"
 # python_executable = ".venv/env/virtual/jinjarope/Scripts/python.exe"
-disable_error_code = ["import"]
 pretty = true
 check_untyped_defs = true
 exclude = ["venv/", ".venv/", "tests/"]

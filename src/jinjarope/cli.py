@@ -81,7 +81,7 @@ def render(
     if output is None:
         print(text)
     else:
-        import fsspec
+        import fsspec  # type: ignore[import-untyped]
 
         with fsspec.open(output, mode="w", encoding="utf-8") as f:
             f.write(text)

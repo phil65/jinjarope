@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import fsspec
+import fsspec  # type: ignore[import-untyped]
 import jinja2
 import pytest
 

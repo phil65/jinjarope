@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Literal, override
 
-import fsspec
-from fsspec.implementations import memory
+import fsspec  # type: ignore[import-untyped]
+from fsspec.implementations import memory  # type: ignore[import-untyped]
 import jinja2
 
 

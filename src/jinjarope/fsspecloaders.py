@@ -13,7 +13,7 @@ from jinjarope import envglobals, loaders as loaders_, utils
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    import fsspec
+    import fsspec  # type: ignore[import-untyped]
 
 
 @functools.cache
@@ -121,8 +121,8 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
                 Also supports "::dir" prefix to set the root path.
             kwargs: Optional storage options for the filesystem.
         """
-        import fsspec
-        import fsspec.core
+        import fsspec  # type: ignore[import-untyped]
+        import fsspec.core  # type: ignore[import-untyped]
 
         super().__init__()
         match fs:
