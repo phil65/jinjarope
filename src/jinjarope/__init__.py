@@ -25,7 +25,7 @@ registry = LoaderRegistry()
 get_loader = registry.get_loader
 
 
-def get_loader_cls_by_id(loader_id: str) -> type[BaseLoader]:  # type: ignore
+def get_loader_cls_by_id(loader_id: str) -> type[BaseLoader]:
     from . import inspectfilters
 
     loaders = {i.ID: i for i in inspectfilters.list_subclasses(LoaderMixin) if "ID" in i.__dict__}
