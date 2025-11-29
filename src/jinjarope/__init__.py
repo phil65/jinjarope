@@ -24,11 +24,11 @@ registry = LoaderRegistry()
 get_loader = registry.get_loader
 
 
-def get_loader_cls_by_id(loader_id: str):
+def get_loader_cls_by_id(loader_id: str) -> type[BaseLoader]:  # type: ignore # noqa: F821
     from . import inspectfilters
 
     loaders = {i.ID: i for i in inspectfilters.list_subclasses(LoaderMixin) if "ID" in i.__dict__}
-    return loaders[loader_id]
+    return loaders[loader_id]  # type: ignore[no-any-return]
 
 
 ____version__ = _metadata_version("jinjarope")

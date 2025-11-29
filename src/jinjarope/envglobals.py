@@ -80,7 +80,12 @@ def add(text: str | None, prefix: str = "", suffix: str = "") -> str:
     return f"{prefix}{text}{suffix}" if text else ""
 
 
-def ternary(value: Any, true_val: Any, false_val: Any, none_val: Any = None):
+def ternary[TTrue, TFalse, TNone = None](
+    value: Any,
+    true_val: TTrue,
+    false_val: TFalse,
+    none_val: TNone | None = None,
+) -> bool | TTrue | TFalse | TNone:
     """Value ? true_val : false_val.
 
     Args:
@@ -112,7 +117,7 @@ def match(obj: Any, mapping: dict[str | type, str] | None = None, **kwargs: Any)
     """
     # kwargs can only contain strs as keys, so we can perform simply getitem.
     if kwargs and obj in kwargs:
-        return kwargs[obj]
+        return kwargs[obj]  # type: ignore[no-any-return]
 
     for k, v in (mapping or {}).items():
         match k:

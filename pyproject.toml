@@ -100,6 +100,7 @@ docstring-style = "google"
 python_version = "3.13"
 # python_executable = ".venv/env/virtual/jinjarope/Scripts/python.exe"
 pretty = true
+strict = true
 check_untyped_defs = true
 exclude = ["venv/", ".venv/", "tests/"]
 plugins = ["pydantic.mypy"]

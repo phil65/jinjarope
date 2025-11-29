@@ -85,11 +85,11 @@ def dig(
 
 
 def merge(
-    target: list | dict[str, Any],
-    *source: list | dict[str, Any],
+    target: list[Any] | dict[str, Any],
+    *source: list[Any] | dict[str, Any],
     deepcopy: bool = False,
     mergers: dict[type, Callable[[Any, Any, Any], Any]] | None = None,
-) -> list | dict[str, Any]:
+) -> list[Any] | dict[str, Any]:
     """Merge given data structures using mergers provided.
 
     Args:

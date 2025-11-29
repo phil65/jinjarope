@@ -13,7 +13,7 @@ import jinja2
 logger = logging.getLogger(__name__)
 
 
-class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):
+class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):  # type: ignore[misc]
     """A FsSpec Filesystem implementation for jinja environment templates."""
 
     protocol = "jinja"

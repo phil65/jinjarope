@@ -62,7 +62,7 @@ class NestedDictLoader(loaders.LoaderMixin, jinja2.BaseLoader):
             assert isinstance(data, str)
         except (AssertionError, KeyError) as e:
             raise jinja2.TemplateNotFound(template) from e
-        return data, None, lambda: True  # type: ignore[return-value]
+        return data, None, lambda: True
 
 
 class TemplateFileLoader(NestedDictLoader):

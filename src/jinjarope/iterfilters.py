@@ -151,7 +151,9 @@ def reduce_list[T](items: Iterable[T]) -> list[T]:
     return list(dict.fromkeys(items))
 
 
-def flatten_dict(dct: Mapping, sep: str = "/", _parent_key: str = "") -> Mapping:
+def flatten_dict(
+    dct: Mapping[str, Any], sep: str = "/", _parent_key: str = ""
+) -> Mapping[str, Any]:
     """Flatten a nested dictionary to a flat one.
 
     The individual parts of the "key path" are joined with given separator.
@@ -226,7 +228,7 @@ def groupby[T](
     sort_groups: bool = True,
     natural_sort: bool = False,
     reverse: bool = False,
-) -> dict[str, list[T]]:
+) -> dict[Any, list[T]]:
     """Group given iterable using given group function.
 
     Args:
@@ -238,20 +240,20 @@ def groupby[T](
     """
     if key is None:
 
-        def keyfunc(x):
+        def keyfunc[TKey](x: TKey) -> TKey:
             return x
 
     elif isinstance(key, str):
-        keyfunc = operator.attrgetter(key)  # pyright: ignore
+        keyfunc = operator.attrgetter(key)  # type: ignore[assignment]
     else:
-        keyfunc = key
+        keyfunc = key  # type: ignore[assignment]
     if sort_groups or natural_sort:
         if natural_sort:
             import natsort
 
-            data = natsort.natsorted(data, key=keyfunc)
+            data = natsort.natsorted(data, key=keyfunc)  # type: ignore[arg-type]
         else:
-            data = sorted(data, key=keyfunc)
+            data = sorted(data, key=keyfunc)  # type: ignore[arg-type]
     if reverse:
         data = reversed(list(data))
     return {k: list(g) for k, g in itertools.groupby(data, keyfunc)}

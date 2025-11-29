@@ -40,7 +40,7 @@ class FsSpecProtocolPathLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
     def __eq__(self, other: object) -> bool:
         return type(self) is type(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(type(self))
 
     def get_source(
@@ -121,7 +121,7 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
                 Also supports "::dir" prefix to set the root path.
             kwargs: Optional storage options for the filesystem.
         """
-        import fsspec  # type: ignore[import-untyped]
+        import fsspec
         import fsspec.core  # type: ignore[import-untyped]
 
         super().__init__()
@@ -137,15 +137,16 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
     def __repr__(self) -> str:
         return utils.get_repr(self, fs=self.fs)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, FsSpecFileSystemLoader):
+            return NotImplemented
         return (
-            type(self) is type(other)
-            and self.storage_options == other.storage_options
+            self.storage_options == other.storage_options
             and self.fs == other.fs
             and self.path == other.path
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(tuple(sorted(self.storage_options.items()))) + hash(self.fs) + hash(self.path)
 
     def list_templates(self) -> list[str]:

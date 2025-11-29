@@ -9,7 +9,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
 
-def merge_dict(merger: DeepMerger, source: Mapping, target: Mapping) -> Mapping:
+def merge_dict(
+    merger: DeepMerger, source: Mapping[Any, Any], target: Mapping[Any, Any]
+) -> Mapping[Any, Any]:
     """Merge two mappings recursively.
 
     Args:
@@ -41,7 +43,7 @@ def merge_dict(merger: DeepMerger, source: Mapping, target: Mapping) -> Mapping:
     return result
 
 
-def merge_list(merger: DeepMerger, source: list, target: list) -> list:
+def merge_list(merger: DeepMerger, source: list[Any], target: list[Any]) -> list[Any]:
     """Concatenate two lists.
 
     Args:
@@ -62,7 +64,7 @@ def merge_list(merger: DeepMerger, source: list, target: list) -> list:
     return target + source
 
 
-DEFAULT_MERGERS: dict[type, Callable] = {
+DEFAULT_MERGERS: dict[type, Callable[..., Any]] = {
     dict: merge_dict,
     list: merge_list,
 }
@@ -117,7 +119,7 @@ class DeepMerger:
         if source_type is not target_type or merger is None:
             msg = f"Cannot merge {source_type} with {target_type}"
             raise TypeError(msg)
-        return merger(self, source, target)
+        return merger(self, source, target)  # type: ignore[no-any-return]
 
 
 if __name__ == "__main__":

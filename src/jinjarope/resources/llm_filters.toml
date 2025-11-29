@@ -19,8 +19,3 @@ template = """
 template = """
 {{ "Explain its importance." | llm_complete(model="ollama/smollm2:360m", context="We were discussing Python's role in data science.") }}
 """
-
-[filters.llm_generate_image]
-fn = "jinjarope.llmfilters.llm_generate_image"
-group = "llm"
-required_packages = ["llmling-agent", "litellm", "pillow"]

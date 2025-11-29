@@ -144,7 +144,7 @@ def format_css_rule(dct: Mapping[str, Any]) -> str:
     Args:
         dct: The mapping to convert to CSS text
     """
-    data: dict[str, list] = {}
+    data: dict[str, list[str]] = {}
 
     def _parse(obj: Mapping[str, Any], selector: str = "") -> None:
         for key, value in obj.items():
@@ -296,7 +296,7 @@ def split_url(value: str, query: QueryStr | None = None) -> str | dict[str, str]
     if query not in results:
         msg = "split_url: unknown URL component: %s"
         raise ValueError(msg, query)
-    return results[query]
+    return results[query]  # type: ignore[no-any-return]
 
 
 @functools.lru_cache

@@ -266,7 +266,9 @@ def get_signature(obj: Callable[..., Any]) -> inspect.Signature:
 
 
 @functools.cache
-def get_members(obj: object, predicate: Callable[[Any], bool] | None = None):
+def get_members(
+    obj: object, predicate: Callable[[Any], bool] | None = None
+) -> list[tuple[str, Any]]:
     """Cached version of inspect.getmembers.
 
     Args:

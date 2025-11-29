@@ -142,7 +142,7 @@ class JinjaItem:
         if not callable(obj):
             msg = "Filter needs correct, importable Path for callable"
             raise TypeError(msg)
-        return obj
+        return obj  # type: ignore[no-any-return]
 
     @classmethod
     def for_function(

@@ -5,7 +5,7 @@ import functools
 import inspect
 import itertools
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from jinjarope import utils
 
@@ -84,7 +84,7 @@ def snake_case(text: str) -> str:
 
 
 @functools.cache
-def format_code(code: str, line_length: int = 100):
+def format_code(code: str, line_length: int = 100) -> str:
     """Format code to given line length using `black`.
 
     Args:
@@ -110,7 +110,7 @@ def extract_body(src: str) -> str:
     # see https://stackoverflow.com/questions/38050649
     lines = src.split("\n")
     src_lines = itertools.dropwhile(lambda x: x.strip().startswith("@"), lines)
-    line = next(src_lines).strip()  # type: ignore
+    line = next(src_lines).strip()
     if not line.startswith(("def ", "class ")):
         return line.rsplit(":")[-1].strip()
     if not line.endswith(":"):
@@ -123,7 +123,7 @@ def extract_body(src: str) -> str:
 
 @functools.cache
 def format_signature(
-    fn: Callable,
+    fn: Callable[..., Any],
     follow_wrapped: bool = True,
     eval_str: bool = True,
     remove_jinja_arg: bool = False,
@@ -152,7 +152,7 @@ def format_signature(
 
 
 def format_filter_signature(
-    fn: Callable,
+    fn: Callable[..., Any],
     filter_name: str,
     follow_wrapped: bool = True,
     eval_str: bool = False,

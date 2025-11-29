@@ -18,14 +18,15 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-type AnyPath = str | os.PathLike | JoinablePath
+type AnyPath = str | os.PathLike[str] | JoinablePath
 
 
 class DataclassInstance(Protocol):
     __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
 
 
-def partial(fn: Callable, *args: Any, **kwargs: Any):
+# delegation for docstrings
+def partial[T](fn: Callable[..., T], *args: Any, **kwargs: Any) -> Callable[..., T]:
     """Create new function with partial application of given arguments / keywords.
 
     Args:
@@ -87,10 +88,10 @@ def fsspec_get(path: str | os.PathLike[str]) -> str:
     Args:
         path: The path to fetch the file from
     """
-    import fsspec
+    import fsspec  # type: ignore[import-untyped]
 
     with fsspec.open(path) as file:
-        return file.read().decode()  # pyright: ignore[reportAttributeAccessIssue]
+        return file.read().decode()  # type: ignore[no-any-return]
 
 
 @functools.lru_cache(maxsize=1)

@@ -37,14 +37,12 @@ class RewriteLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
     def __repr__(self) -> str:
         return utils.get_repr(self, self.loader, self.rewrite_fn)
 
-    def __eq__(self, other):
-        return (
-            type(self) is type(other)
-            and self.loader == other.loader
-            and self.rewrite_fn == other.rewrite_fn
-        )
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, RewriteLoader):
+            return NotImplemented
+        return self.loader == other.loader and self.rewrite_fn == other.rewrite_fn
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.loader) + hash(self.rewrite_fn)
 
     def get_source(

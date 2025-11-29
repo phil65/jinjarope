@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import pathlib
 import types
 from typing import TYPE_CHECKING, Any
@@ -10,7 +11,10 @@ from jinjarope import inspectfilters, utils
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
+
+    from fsspec.utils import Iterator  # type: ignore[import-untyped]
+    from jinja2 import BaseLoader
 
 
 class LoaderMixin:
@@ -18,9 +22,9 @@ class LoaderMixin:
 
     ID: str
     loader: jinja2.BaseLoader
-    list_templates: Callable
-    get_source: Callable
-    load: Callable
+    list_templates: Callable[..., Any]
+    get_source: Callable[..., Any]
+    load: Callable[..., jinja2.Template]
 
     def __or__(self, other: jinja2.BaseLoader) -> ChoiceLoader:
         own = self.loaders if isinstance(self, jinja2.ChoiceLoader) else [self]  # type: ignore[list-item]
@@ -37,10 +41,10 @@ class LoaderMixin:
 
         return upath.UPath(path).as_posix() in self.list_templates()
 
-    def __rtruediv__(self, path: str):
+    def __rtruediv__(self, path: str) -> PrefixLoader:
         return self.prefixed_with(path)
 
-    def prefixed_with(self, prefix: str):
+    def prefixed_with(self, prefix: str) -> PrefixLoader:
         """Return loader wrapped in a PrefixLoader instance with given prefix.
 
         Args:
@@ -48,9 +52,9 @@ class LoaderMixin:
         """
         return PrefixLoader({prefix: self})  # type: ignore[dict-item]
 
-    def get_template_source(self, template_path: str):
+    def get_template_source(self, template_path: str) -> str:
         """Return the source for given template path."""
-        return self.get_source(None, template_path)[0]
+        return self.get_source(None, template_path)[0]  # type: ignore[no-any-return]
 
 
 class PrefixLoader(LoaderMixin, jinja2.PrefixLoader):
@@ -61,16 +65,18 @@ class PrefixLoader(LoaderMixin, jinja2.PrefixLoader):
     def __repr__(self) -> str:
         return utils.get_repr(self, self.mapping)
 
-    def __eq__(self, other):
-        return type(self) is type(other) and self.mapping == other.mapping
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, PrefixLoader):
+            return NotImplemented
+        return self.mapping == other.mapping
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(tuple(sorted(self.mapping.items())))
 
     def __bool__(self) -> bool:
         return bool(self.mapping)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Mapping[str, BaseLoader]]:
         return iter(self.mapping)
 
 
@@ -85,14 +91,12 @@ class ModuleLoader(LoaderMixin, jinja2.ModuleLoader):
     def __repr__(self) -> str:
         return utils.get_repr(self, path=self.module.__path__)
 
-    def __eq__(self, other):
-        return (
-            type(self) is type(other)
-            and self.package_name == other.package_name
-            and self.module == other.module
-        )
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ModuleLoader):
+            return NotImplemented
+        return self.package_name == other.package_name and self.module == other.module
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.package_name) + hash(self.module)
 
 
@@ -108,10 +112,12 @@ class FunctionLoader(LoaderMixin, jinja2.FunctionLoader):
     def __repr__(self) -> str:
         return utils.get_repr(self, self.load_func)
 
-    def __eq__(self, other):
-        return type(self) is type(other) and self.load_func == other.load_func
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, FunctionLoader):
+            return NotImplemented
+        return self.load_func == other.load_func
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.load_func)
 
 
@@ -151,14 +157,12 @@ class PackageLoader(LoaderMixin, jinja2.PackageLoader):
             package_path=self.package_path,
         )
 
-    def __eq__(self, other):
-        return (
-            type(self) is type(other)
-            and self.package_name == other.package_name
-            and self.package_path == other.package_path
-        )
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, PackageLoader):
+            return NotImplemented
+        return self.package_name == other.package_name and self.package_path == other.package_path
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.package_name) + hash(self.package_path)
 
 
@@ -170,17 +174,19 @@ class FileSystemLoader(LoaderMixin, jinja2.FileSystemLoader):
     def __repr__(self) -> str:
         return utils.get_repr(self, searchpath=self.searchpath)
 
-    def __add__(self, other) -> FileSystemLoader:
-        ls = [other] if isinstance(other, jinja2.FileSystemLoader) else other.serchpath
+    def __add__(self, other: FileSystemLoader | str | os.PathLike[str]) -> FileSystemLoader:
+        ls = [other] if isinstance(other, str | os.PathLike) else other.searchpath
         return FileSystemLoader([*self.searchpath, *ls])  # pyright: ignore
 
     def __bool__(self) -> bool:
         return len(self.searchpath) > 0
 
-    def __eq__(self, other):
-        return type(self) is type(other) and self.searchpath == other.searchpath
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, FileSystemLoader):
+            return NotImplemented
+        return self.searchpath == other.searchpath
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(tuple(self.searchpath))
 
 
@@ -195,13 +201,15 @@ class ChoiceLoader(LoaderMixin, jinja2.ChoiceLoader):
     def __bool__(self) -> bool:
         return len(self.loaders) > 0
 
-    def __eq__(self, other):
-        return type(self) is type(other) and self.loaders == other.loaders
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ChoiceLoader):
+            return NotImplemented
+        return self.loaders == other.loaders
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(tuple(self.loaders))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[jinja2.BaseLoader]:
         return iter(self.loaders)
 
 
@@ -220,10 +228,12 @@ class DictLoader(LoaderMixin, jinja2.DictLoader):
             mapping = {**self.mapping, **other}
         return DictLoader(mapping)
 
-    def __eq__(self, other):
-        return type(self) is type(other) and self.mapping == other.mapping
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DictLoader):
+            return NotImplemented
+        return self.mapping == other.mapping
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(tuple(sorted(self.mapping.items())))
 
 
@@ -261,9 +271,9 @@ def from_json(
                     for kls in inspectfilters.list_subclasses(jinja2.BaseLoader)
                     if getattr(kls, "ID", None) == typ
                 )
-                if kls.ID == "prefix":  # type: ignore[attr-defined]
+                if kls.ID == "prefix":
                     mapping = {k: from_json(v) for k, v in mapping.items()}
-                    loader = kls(mapping)  # type: ignore[call-arg]
+                    loader = kls(mapping)
                 elif prefix:
                     loader = prefix / kls(**dct_copy)
                 else:

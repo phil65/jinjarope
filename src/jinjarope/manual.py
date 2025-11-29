@@ -3,7 +3,7 @@ from __future__ import annotations
 import mknodes as mk
 from mknodes.manual import dev_section
 
-from jinjarope import inspectfilters, iterfilters, jinjafile, mdfilters
+from jinjarope import JinjaItem, inspectfilters, iterfilters, jinjafile, mdfilters
 
 
 RESOURCE_PATH = "src/jinjarope/resources"
@@ -19,7 +19,7 @@ FILES = [
 ]
 
 
-def table_for_items(items) -> mk.MkTable:
+def table_for_items(items: list[JinjaItem]) -> mk.MkTable:
     t = mk.MkTable(columns=["Name", "Description"])
     for item in items:
         link = mdfilters.autoref_link(item.identifier, item.identifier)
@@ -30,12 +30,12 @@ def table_for_items(items) -> mk.MkTable:
 
 class Build:
     @classmethod
-    def build(cls, root, theme):
+    def build(cls, root: mk.MkNav, theme: mk.Theme) -> mk.MkNav:
         b = cls()
         # b.on_theme(theme)
         return b.on_root(root)
 
-    def on_root(self, nav: mk.MkNav):
+    def on_root(self, nav: mk.MkNav) -> mk.MkNav:
         self.nav = nav
         nav.page_template.announcement_bar = mk.MkMetadataBadges("websites")
         page = nav.add_page(is_index=True, hide="nav,toc")

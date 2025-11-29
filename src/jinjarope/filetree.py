@@ -119,7 +119,7 @@ class DirectoryTree:
             SortCriteria.EXTENSION: lambda: (info["extension"], info["name"].lower()),
         }
         # Always sort directories first within each category
-        return not path.is_dir(), criteria_keys[self.options.sort_criteria]()
+        return not path.is_dir(), criteria_keys[self.options.sort_criteria]()  # type: ignore[no-untyped-call]
 
     def _should_include(self, path: upath.UPath) -> bool:
         """Check if path should be included based on filters.

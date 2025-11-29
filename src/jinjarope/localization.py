@@ -31,7 +31,7 @@ except ImportError:  # pragma: no cover
             return self.language
 
         @classmethod
-        def parse(cls, identifier: str, sep: str | None):
+        def parse(cls, identifier: str, sep: str | None) -> Locale:
             if not isinstance(identifier, str):
                 msg = f"Unexpected value for identifier: {identifier!r}"
                 raise TypeError(msg)
@@ -42,7 +42,7 @@ except ImportError:  # pragma: no cover
             if len(locale.language) != 2:  # noqa: PLR2004
                 msg = f"unknown locale {locale.language!r}"
                 raise UnknownLocaleError(msg)
-            return locale
+            return locale  # type: ignore[return-value]
 
 
 if TYPE_CHECKING:

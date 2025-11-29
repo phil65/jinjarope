@@ -229,7 +229,7 @@ def create_tag_extension(
     typ: Literal["standalone", "container", "inclusion"],
     tag: str | list[str] | set[str],
     render_fn: Callable[..., str],
-):
+) -> type[Extension]:
     """Create a Jinja2 extension from a render function."""
     jinja_tag = {tag} if isinstance(tag, str) else set(tag)
     match typ:
@@ -255,8 +255,10 @@ if __name__ == "__main__":
 
     import jinja2
 
-    def render(secret, digest: str = "sha256", caller=None):
-        content = str(caller()).encode()
+    def render(
+        secret: bytes, digest: str = "sha256", caller: Callable[..., Any] | None = None
+    ) -> str:
+        content = str(caller() if caller else "").encode()
 
         if isinstance(secret, str):
             secret = secret.encode()

@@ -39,7 +39,7 @@ from jinjarope import (
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, MutableMapping, Sequence
+    from collections.abc import Callable, Iterator, MutableMapping, Sequence
     from types import CodeType
 
     from jinja2.ext import Extension
@@ -68,7 +68,13 @@ class Environment(jinja2.Environment):
         trim_blocks: bool = True,
         cache_size: int = -1,
         auto_reload: bool = False,
-        loader: (jinja2.BaseLoader | list[jinja2.BaseLoader] | dict | list[dict] | None) = None,
+        loader: (
+            jinja2.BaseLoader
+            | list[jinja2.BaseLoader]
+            | dict[str, Any]
+            | list[dict[str, Any]]
+            | None
+        ) = None,
         block_start_string: str = BLOCK_START_STRING,
         block_end_string: str = BLOCK_END_STRING,
         variable_start_string: str = VARIABLE_START_STRING,
@@ -284,7 +290,7 @@ class Environment(jinja2.Environment):
             self._add_loader(loader)
 
     @overload
-    def compile(  # type: ignore
+    def compile(
         self,
         source: str | jinja2.nodes.Template,
         name: str | None = None,
@@ -633,7 +639,7 @@ class Environment(jinja2.Environment):
             raise BlockNotFoundError(block_name, template_name) from KeyError
 
         ctx = template.new_context(variables)
-        return self.concat(block_render_func(ctx))  # type: ignore
+        return self.concat(block_render_func(ctx))
         # except Exception:
         #     self.handle_exception()
 
@@ -675,13 +681,13 @@ class Environment(jinja2.Environment):
             raise BlockNotFoundError(block_name, template_name) from KeyError
 
         ctx = template.new_context(variables)
-        return self.concat(  # type: ignore
+        return self.concat(
             [n async for n in block_render_func(ctx)]  # type: ignore
         )
         # return self.concat(block_render_func(ctx))
 
     @contextlib.contextmanager
-    def with_globals(self, **kwargs: Any):
+    def with_globals(self, **kwargs: Any) -> Iterator[None]:
         """Context manager to temporarily set globals for the environment.
 
         This context manager allows temporarily overriding the environment's
@@ -813,7 +819,7 @@ class Environment(jinja2.Environment):
 
         import collections
 
-        class GlobalsMap(collections.ChainMap):
+        class GlobalsMap(collections.ChainMap[Any, Any]):
             def __repr__(self) -> str:
                 return f"GlobalsMap<{len(self)} keys>"
 
