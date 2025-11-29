@@ -18,13 +18,14 @@ from .configloaders import NestedDictLoader, TemplateFileLoader
 from .fsspecloaders import FsSpecFileSystemLoader, FsSpecProtocolPathLoader
 from .loaderregistry import LoaderRegistry
 from .jinjafile import JinjaFile, JinjaItem
+from jinja2 import BaseLoader
 
 registry = LoaderRegistry()
 
 get_loader = registry.get_loader
 
 
-def get_loader_cls_by_id(loader_id: str) -> type[BaseLoader]:  # type: ignore # noqa: F821
+def get_loader_cls_by_id(loader_id: str) -> type[BaseLoader]:  # type: ignore
     from . import inspectfilters
 
     loaders = {i.ID: i for i in inspectfilters.list_subclasses(LoaderMixin) if "ID" in i.__dict__}
