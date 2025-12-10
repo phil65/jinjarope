@@ -30,6 +30,17 @@ template = """
 {{ "a_foldername" | dirname_to_title }}
 """
 
+[filters.get_directory_tree]
+fn = "jinjarope.filetree.get_directory_tree"
+group = "path"
+icon = "mdi:file-tree-outline"
+
+[filters.get_directory_tree.examples.basic]
+markdown = true
+template = """
+{{ "." | get_directory_tree(allowed_extensions=[".py", ".md"]) }}
+"""
+
 [filters.pformat]
 fn = "pprint.pformat"
 group = "format"
