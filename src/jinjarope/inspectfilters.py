@@ -7,7 +7,7 @@ import inspect
 import logging
 import pathlib
 import types
-from typing import Any
+from typing import Annotated, Any, Union, get_args, get_origin
 
 
 logger = logging.getLogger(__name__)
@@ -288,6 +288,50 @@ def get_file(obj: HasCodeType) -> pathlib.Path | None:
     with contextlib.suppress(TypeError):
         return pathlib.Path(inspect.getfile(obj))
     return None
+
+
+def iter_union_types(
+    union_type: Any,
+    *,
+    filter_none: bool = True,
+) -> Iterator[type]:
+    """Iterate through all types in a Union.
+
+    Handles unwrapping of Annotated types automatically.
+
+    Args:
+        union_type: A Union type (e.g., Union[A, B, C] or A | B | C)
+        filter_none: Whether to filter out NoneType from the results
+
+    Yields:
+        Each type found in the union
+
+    Example:
+        >>> from typing import Union
+        >>> for typ in iter_union_types(Union[str, int, None]):
+        ...     print(typ)
+        <class 'str'>
+        <class 'int'>
+    """
+    # Unwrap Annotated if needed
+    origin = get_origin(union_type)
+    if origin is Annotated:
+        # Get the actual type from Annotated[Union[...], ...]
+        union_type = get_args(union_type)[0]
+        origin = get_origin(union_type)
+
+    # Check if it's a Union type
+    if origin not in (Union, types.UnionType):
+        msg = f"Expected Union type, got: {union_type}"
+        raise TypeError(msg)
+
+    # Get all types in the union
+    union_args = get_args(union_type)
+
+    for arg in union_args:
+        if filter_none and arg is type(None):
+            continue
+        yield arg
 
 
 if __name__ == "__main__":

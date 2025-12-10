@@ -27,3 +27,6 @@ junit.xml
 .DS_Store
 # uv
 uv.lock
+
+# Stakpak session files
+.stakpak/session*

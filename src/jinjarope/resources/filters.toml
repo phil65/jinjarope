@@ -1044,6 +1044,18 @@ template = """
 {{ filters.get_file | get_file }}
 """
 
+[filters.iter_union_types]
+fn = "jinjarope.inspectfilters.iter_union_types"
+group = "inspect"
+icon = "mdi:set-split"
+
+[filters.iter_union_types.examples.basic]
+template = """
+{%- for typ in (str | int | None) | iter_union_types -%}
+{{ typ }}
+{% endfor -%}
+"""
+
 [filters.get_structure_map]
 fn = "jinjarope.codetree.get_structure_map"
 group = "inspect"
