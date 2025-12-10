@@ -336,3 +336,31 @@ def iter_union_types(
 
 if __name__ == "__main__":
     doc = get_doc(str)
+
+    # Test iter_union_types
+    from typing import Annotated
+
+    print("\n--- Testing iter_union_types ---")
+
+    # Basic union
+    union_type = str | int | float
+    print("\nUnion: str | int | float")
+    for typ in iter_union_types(union_type):
+        print(f"  - {typ}")
+
+    # Union with None (filtered by default)
+    union_with_none = str | int | None
+    print("\nUnion with None (filtered): str | int | None")
+    for typ in iter_union_types(union_with_none):
+        print(f"  - {typ}")
+
+    # Union with None (not filtered)
+    print("\nUnion with None (not filtered): str | int | None")
+    for typ in iter_union_types(union_with_none, filter_none=False):
+        print(f"  - {typ}")
+
+    # Annotated union
+    annotated_union = Annotated[str | int, "some metadata"]
+    print("\nAnnotated Union: Annotated[str | int, 'metadata']")
+    for typ in iter_union_types(annotated_union):
+        print(f"  - {typ}")
