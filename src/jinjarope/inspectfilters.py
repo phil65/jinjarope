@@ -169,7 +169,8 @@ def get_doc(
     """Get __doc__ for given object.
 
     Args:
-        obj: Object to get docstrings from
+        obj: Object to get docstrings from, or import path string
+            (supports both "module.path:object" and "module.path.object")
         escape: Whether docstrings should get escaped
         fallback: Fallback in case docstrings dont exist
         from_base_classes: Use base class docstrings if docstrings dont exist
@@ -177,6 +178,42 @@ def get_doc(
         only_description: Only return block after first line
     """
     from jinjarope import mdfilters
+
+    # Handle string import paths
+    if isinstance(obj, str):
+        import importlib
+
+        # Try colon notation first (module.path:object)
+        if ":" in obj:
+            module_path, obj_name = obj.rsplit(":", 1)
+            try:
+                module = importlib.import_module(module_path)
+                obj = getattr(module, obj_name)
+            except (ImportError, AttributeError) as e:
+                logger.debug(f"Failed to import {obj}: {e}")  # noqa: G004
+                return fallback
+        else:
+            # Try dot notation (module.path.object)
+            parts = obj.rsplit(".", 1)
+            if len(parts) == 2:  # noqa: PLR2004
+                module_path, obj_name = parts
+                try:
+                    module = importlib.import_module(module_path)
+                    obj = getattr(module, obj_name)
+                except (ImportError, AttributeError):
+                    # Maybe the whole thing is a module?
+                    try:
+                        obj = importlib.import_module(obj)
+                    except ImportError as e:
+                        logger.debug(f"Failed to import {obj}: {e}")  # noqa: G004
+                        return fallback
+            else:
+                # Just a module name
+                try:
+                    obj = importlib.import_module(obj)
+                except ImportError as e:
+                    logger.debug(f"Failed to import {obj}: {e}")  # noqa: G004
+                    return fallback
 
     match obj:
         case _ if from_base_classes:
