@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 import contextlib
 import functools
+import importlib
 import inspect
 import logging
 import pathlib
@@ -181,8 +182,6 @@ def get_doc(
 
     # Handle string import paths
     if isinstance(obj, str):
-        import importlib
-
         # Try colon notation first (module.path:object)
         if ":" in obj:
             module_path, obj_name = obj.rsplit(":", 1)
