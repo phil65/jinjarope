@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 import dataclasses
 import functools
 import importlib
@@ -12,7 +13,6 @@ from upath.types import JoinablePath
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
     from dataclasses import Field
     import os
 

@@ -64,10 +64,7 @@ def merge_list(merger: DeepMerger, source: list[Any], target: list[Any]) -> list
     return target + source
 
 
-DEFAULT_MERGERS: dict[type, Callable[..., Any]] = {
-    dict: merge_dict,
-    list: merge_list,
-}
+DEFAULT_MERGERS: dict[type, Callable[..., Any]] = {dict: merge_dict, list: merge_list}
 
 
 class DeepMerger:
