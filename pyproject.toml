@@ -51,7 +51,7 @@ cli = ["rich", "typer"]
 extras = ["black", "pygments", "humanize", "natsort"]
 httpx = ["httpx"]
 icons = ["pyconify"]
-llm = ["llmling-agent[litellm,pillow]"]
+llm = ["agentpool[litellm,pillow]"]
 yaml = ["yamling"]
 
 [dependency-groups]

@@ -3,7 +3,7 @@
 [filters.llm_complete]
 fn = "llmling_agent_functional.run_agent"
 group = "llm"
-required_packages = ["llmling-agent", "litellm"]
+required_packages = ["agentpool", "litellm"]
 
 [filters.llm_complete.examples.basic]
 template = """
