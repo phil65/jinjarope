@@ -3,7 +3,8 @@ from __future__ import annotations
 import dataclasses
 import functools
 import importlib
-from importlib.metadata import entry_points as _entry_points
+
+# from importlib.metadata import entry_points as _entry_points  # replaced by epregistry
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol, overload
 
@@ -118,17 +119,20 @@ def _get_black_formatter() -> Callable[[str, int], str]:
     return formatter
 
 
-@functools.lru_cache
 def entry_points(group: str) -> Mapping[str, Callable[..., Any]]:
-    result = {}
-    for ep in _entry_points(group=group):
-        try:
-            result[ep.name] = ep.load()
-        except Exception as e:  # noqa: BLE001
-            msg = "Failed to load entry point %r from group %r: %s"
-            logger.warning(msg, ep.name, group, str(e))
-    logger.debug("Available %r entry points: %s", group, sorted(result))
-    return result
+    """Get entry points for a group using epregistry.
+
+    Args:
+        group: Entry point group name
+
+    Returns:
+        Mapping of entry point names to loaded callables
+    """
+    from epregistry import EntryPointRegistry
+
+    registry = EntryPointRegistry[Callable[..., Any]](group)
+    # load_all() handles exceptions internally and logs warnings for failures
+    return registry.load_all()
 
 
 def get_hash(obj: Any, hash_length: int | None = 7) -> str:

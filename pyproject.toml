@@ -32,6 +32,7 @@ classifiers = [
 ]
 dependencies = [
   "anyenv>=0.4.17",
+  "epregistry",
   "fsspec",
   "jinja2",
   "universal_pathlib",
