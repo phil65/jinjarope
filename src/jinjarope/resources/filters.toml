@@ -1087,7 +1087,7 @@ template = """
 [filters.get_icon_svg]
 fn = "jinjarope.iconfilters.get_icon_svg"
 group = "icons"
-required_packages = ["pyconify"]
+required_packages = ["pycons"]
 icon = "mdi:svg"
 
 [filters.get_icon_svg.examples.basic]
@@ -1108,7 +1108,7 @@ template = """
 [filters.get_pyconify_key]
 fn = "jinjarope.iconfilters.get_pyconify_key"
 group = "icons"
-required_packages = ["pyconify"]
+required_packages = ["pycons"]
 icon = "mdi:key"
 
 [filters.get_pyconify_key.examples.basic]

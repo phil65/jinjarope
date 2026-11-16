@@ -532,9 +532,9 @@ def get_icon_svg(
     label = ""
     for splitted in icon.split("|"):
         key = get_pyconify_key(splitted)
-        import pyconify
+        from pycons.iconify import api
 
-        label += pyconify.svg(
+        label += api.svg(
             key,
             color=color,
             height=height,

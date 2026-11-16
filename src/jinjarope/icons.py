@@ -29,9 +29,9 @@ def _get_collection_map(*prefixes: str) -> dict[str, list[str]]:
     Args:
         prefixes: The collections to fetch
     """
-    import pyconify
+    from pycons.iconify import api
 
-    mapping = {coll: [coll] for coll in pyconify.collections(*prefixes)}
+    mapping = {coll: [coll] for coll in api.collections(*prefixes)}
     for k, v in PYCONIFY_TO_PREFIXES.items():
         if k in mapping:
             mapping[k].append(v)
@@ -50,12 +50,16 @@ def _get_pyconify_icon_index(*collections: str) -> dict[str, dict[str, str]]:
     Args:
         collections: Collections to fetch. If none given, fetch all
     """
-    import pyconify
+    from pycons.iconify import api
 
     index = {}
     for coll, prefixes in _get_collection_map(*collections).items():
-        collection = pyconify.collection(coll)
-        for icon_name in collection.get("uncategorized", []):
+        collection = api.collection(coll)
+        icon_names = [
+            *collection.get("uncategorized", []),
+            *(name for cat in collection.get("categories", {}).values() for name in cat),
+        ]
+        for icon_name in icon_names:
             for prefix in prefixes:
                 name = f":{prefix}-{icon_name}:"
                 index[name] = {
@@ -63,15 +67,6 @@ def _get_pyconify_icon_index(*collections: str) -> dict[str, dict[str, str]]:
                     "path": f"{coll}:{icon_name}",
                     "set": coll,
                 }
-        for cat in pyconify.collection(coll).get("categories", {}).values():
-            for icon_name in cat:
-                for prefix in prefixes:
-                    name = f":{prefix}-{icon_name}:"
-                    index[name] = {
-                        "name": name,
-                        "path": f"{coll}:{icon_name}",
-                        "set": coll,
-                    }
     return index
 
 
@@ -85,6 +80,7 @@ def write_icon_index() -> None:
         file.write(json.dumps(mapping).encode())
 
 
+@functools.cache
 def load_icon_index() -> dict[str, dict[str, str]]:
     """Load the complete icon index from disk."""
     import gzip

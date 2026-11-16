@@ -50,7 +50,7 @@ jinjarope = "jinjarope.cli:cli"
 cli = ["rich", "typer"]
 extras = ["black", "pygments", "humanize", "natsort"]
 httpx = ["httpx"]
-icons = ["pyconify"]
+icons = ["pycons>=1.1.0"]
 llm = ["agentpool[litellm,pillow]"]
 yaml = ["yamling"]
 
