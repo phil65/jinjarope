@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import hmac
 from typing import Any
 
@@ -17,7 +17,7 @@ class CurrentTimeTag(StandaloneTag):
     tags = {"current_time"}  # noqa: RUF012
 
     def render(self, format_str: str = "%H:%M:%S") -> str:
-        return datetime.datetime.now().strftime(format_str)
+        return dt.datetime.now().strftime(format_str)
 
 
 class AlertTag(StandaloneTag):
@@ -69,7 +69,7 @@ def env() -> Environment:
     )
 
 
-def test_current_time_tag(env: Environment):
+def test_current_time_tag(env: Environment) -> None:
     """Test CurrentTimeTag renders current time correctly."""
     template = env.from_string('{% current_time "%H:%M" %}')
     result = template.render()
@@ -81,7 +81,7 @@ def test_current_time_tag(env: Environment):
     assert result.replace(":", "").isdigit()
 
 
-def test_current_time_tag_with_assignment(env: Environment):
+def test_current_time_tag_with_assignment(env: Environment) -> None:
     """Test CurrentTimeTag with variable assignment."""
     template = env.from_string('{% current_time "%H:%M" as time %}Time is: {{ time }}')
     result = template.render()
@@ -91,7 +91,7 @@ def test_current_time_tag_with_assignment(env: Environment):
     assert len(result) == len_string
 
 
-def test_alert_tag(env: Environment):
+def test_alert_tag(env: Environment) -> None:
     """Test AlertTag renders HTML correctly."""
     template = env.from_string('{% alert "Hello World" %}')
     result = template.render()
@@ -100,7 +100,7 @@ def test_alert_tag(env: Environment):
     assert ">Hello World<" in result
 
 
-def test_alert_tag_with_type(env: Environment):
+def test_alert_tag_with_type(env: Environment) -> None:
     """Test AlertTag with custom alert type."""
     template = env.from_string('{% alert "Error occurred", type_="danger" %}')
     result = template.render()
@@ -109,7 +109,7 @@ def test_alert_tag_with_type(env: Environment):
     assert ">Error occurred<" in result
 
 
-def test_encrypt_tag(env: Environment):
+def test_encrypt_tag(env: Environment) -> None:
     """Test EncryptTag encrypts content correctly."""
     template = env.from_string('{% encrypt "secret", digest="sha1" %}test content{% endencrypt %}')
     result = template.render()
@@ -120,7 +120,7 @@ def test_encrypt_tag(env: Environment):
     assert all(c in "0123456789abcdef" for c in result)
 
 
-def test_header_tag(env: Environment):
+def test_header_tag(env: Environment) -> None:
     """Test HeaderTag includes template correctly."""
     # Mock template loader
     content = "<h1>{{ title }}</h1>{% if subtitle %}<h2>{{ subtitle }}</h2>{% endif %}"
@@ -133,7 +133,7 @@ def test_header_tag(env: Environment):
     assert "<h2>Hello</h2>" in result
 
 
-def test_header_tag_minimal(env: Environment):
+def test_header_tag_minimal(env: Environment) -> None:
     """Test HeaderTag with minimal parameters."""
     # Mock template loader
     env.loader = jinja2.DictLoader({"header.html": "<h1>{{ title }}</h1>"})

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import pathlib
 from typing import TYPE_CHECKING, Any
@@ -145,18 +145,18 @@ def has_internet() -> bool:
         conn.close()
 
 
-def now(tz: datetime.tzinfo | None = None) -> datetime.datetime:
+def now(tz: dt.tzinfo | None = None) -> dt.datetime:
     """Get current Datetime.
 
     Args:
         tz: timezone for retuned datetime
     """
-    return datetime.datetime.now(tz)
+    return dt.datetime.now(tz)
 
 
-def utcnow() -> datetime.datetime:
+def utcnow() -> dt.datetime:
     """Get UTC datetime."""
-    return datetime.datetime.now(datetime.UTC)
+    return dt.datetime.now(dt.UTC)
 
 
 ENV_GLOBALS: dict[str, Callable[..., Any]] = {

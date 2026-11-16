@@ -8,7 +8,7 @@ import inspect
 import logging
 import pathlib
 import types
-from typing import Annotated, Any, Union, get_args, get_origin
+from typing import Annotated, Any, Union, cast, get_args, get_origin
 
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ def iter_subclasses[ClassType: type](
     """
     if getattr(klass.__subclasses__, "__self__", None) is None:
         return
-    for kls in klass.__subclasses__():
+    for kls in cast(list[ClassType], klass.__subclasses__()):
         if recursive:
             yield from iter_subclasses(
                 kls,

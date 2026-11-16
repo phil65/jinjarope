@@ -27,7 +27,7 @@ class LoaderMixin:
     load: Callable[..., jinja2.Template]
 
     def __or__(self, other: jinja2.BaseLoader) -> ChoiceLoader:
-        own = self.loaders if isinstance(self, jinja2.ChoiceLoader) else [self]  # type: ignore[list-item]
+        own = self.loaders if isinstance(self, jinja2.ChoiceLoader) else [self]
         others = other.loaders if isinstance(other, jinja2.ChoiceLoader) else [other]
         return ChoiceLoader([*own, *others])  # pyright: ignore[reportArgumentType]
 

@@ -92,7 +92,8 @@ def load_icon_index() -> dict[str, dict[str, str]]:
     import anyenv
 
     with gzip.open(ICON_FILE, "r") as file:
-        return anyenv.load_json(file.read())
+        index: dict[str, dict[str, str]] = anyenv.load_json(file.read())
+    return index
 
 
 if __name__ == "__main__":

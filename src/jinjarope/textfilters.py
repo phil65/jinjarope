@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import functools
 import inspect
 import itertools
@@ -231,7 +231,7 @@ def format_timestamp(timestamp: float, fmt: str) -> str:
     Returns:
         Formatted date string
     """
-    return datetime.datetime.fromtimestamp(timestamp).strftime(fmt)
+    return dt.datetime.fromtimestamp(timestamp).strftime(fmt)
 
 
 if __name__ == "__main__":
