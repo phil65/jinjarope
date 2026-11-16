@@ -1,9 +1,9 @@
 # This file contains definitions for functions of the "litellm" library.
 
 [filters.llm_complete]
-fn = "llmling_agent_functional.run_agent"
+fn = "agentpool.functional.run_agent"
 group = "llm"
-required_packages = ["agentpool", "litellm"]
+required_packages = ["agentpool"]
 
 [filters.llm_complete.examples.basic]
 template = """

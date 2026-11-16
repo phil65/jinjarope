@@ -238,7 +238,7 @@ class DictLoader(LoaderMixin, jinja2.DictLoader):
 
 
 def from_json(
-    dct_or_list: dict[str, Any] | list[Any] | None | jinja2.BaseLoader,
+    dct_or_list: dict[str, Any] | list[Any] | jinja2.BaseLoader | None,
 ) -> jinja2.BaseLoader | None:
     """Create a loader based on a json representation.
 
