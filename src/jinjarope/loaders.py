@@ -30,7 +30,7 @@ class LoaderMixin:
 
     def __getitem__(self, val: str) -> jinja2.Template:
         """Return the template object for given template path."""
-        return self.load(None, val)
+        return self.load(jinja2.Environment(), val)
 
     def __contains__(self, path: str) -> bool:
         """Check whether given path is loadable by this loader."""

@@ -17,6 +17,12 @@ def test_prefix_loader():
     assert repr(loader1)
 
 
+def test_loader_getitem():
+    loader = jinjarope.DictLoader({"a": "{{ 1 + 1 }}"})
+    assert loader["a"].render() == "2"
+    assert loader.get_template_source("a") == "{{ 1 + 1 }}"
+
+
 def test_function_loader():
     def load_fn(path: str) -> str:
         return "abc"
