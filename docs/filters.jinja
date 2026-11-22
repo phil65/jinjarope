@@ -16,7 +16,9 @@
 {% filter MkAdmonition(title="Example") | string %}
 Jinja call:
 {{ v.template | MkCode(language="jinja") }}
-{% if mode == "tests" or v.markdown is defined %}
+{% if v.render is defined and not v.render %}
+{#- e.g. examples that need an LLM or network access are not executed -#}
+{% elif mode == "tests" or v.markdown is defined %}
 Result:
 {{ v.template | render_string | MkCode(language="") }}
 {% else %}

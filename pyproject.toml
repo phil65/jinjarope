@@ -266,8 +266,8 @@ python-platform = "all"
 include = ["src"]
 
 [tool.ty.analysis]
-# Optional dependencies that are not always installed.
-allowed-unresolved-imports = []
+# Optional dependencies that are not always installed (babel: i18n, mknodes: docs only).
+allowed-unresolved-imports = ["babel", "babel.**", "mknodes", "mknodes.**"]
 
 [tool.ty.rules]
 incompatible-mutable-override = "ignore"

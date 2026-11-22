@@ -5,12 +5,15 @@ fn = "agentpool.functional.run_agent_sync"
 group = "llm"
 required_packages = ["agentpool"]
 
+# Examples need a running model, so the docs only show the template (render = false).
 [filters.llm_complete.examples.basic]
+render = false
 template = """
 {{ "Describe how to install a package from PyPi" | llm_complete(model="ollama:smollm2:360m") }}
 """
 
 [filters.llm_complete.examples.with_system_prompt]
+render = false
 template = """
 {{ "What are the benefits of Python?" | llm_complete(model="ollama:smollm2:360m", system_prompt="You are a helpful programming assistant.") }}
 """

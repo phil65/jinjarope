@@ -35,11 +35,6 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Serve Ollama Model
-        uses: pydantic/ollama-action@v3
-        with:
-          model: "smollm2:360m"
-
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
@@ -50,8 +45,6 @@ jobs:
       - name: Build
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # used by the `llm_complete` examples (pydantic-ai Ollama provider)
-          OLLAMA_BASE_URL: http://localhost:11434/v1
         run: uv run mkdocs-mknodes build
 
       - name: Upload artifact
