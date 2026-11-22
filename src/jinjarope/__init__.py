@@ -32,7 +32,7 @@ def get_loader_cls_by_id(loader_id: str) -> type[BaseLoader]:
     return loaders[loader_id]  # type: ignore[no-any-return]
 
 
-____version__ = _metadata_version("jinjarope")
+__version__ = _metadata_version("jinjarope")
 
 __all__ = [
     "BlockNotFoundError",

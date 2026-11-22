@@ -1,21 +1,16 @@
-# This file contains definitions for functions of the "litellm" library.
+# This file contains definitions for LLM functions of the "agentpool" library.
 
 [filters.llm_complete]
-fn = "agentpool.functional.run_agent"
+fn = "agentpool.functional.run_agent_sync"
 group = "llm"
 required_packages = ["agentpool"]
 
 [filters.llm_complete.examples.basic]
 template = """
-{{ "Describe how to install a package from PyPi" | llm_complete(model="ollama/smollm2:360m") }}
+{{ "Describe how to install a package from PyPi" | llm_complete(model="ollama:smollm2:360m") }}
 """
 
 [filters.llm_complete.examples.with_system_prompt]
 template = """
-{{ "What are the benefits of Python?" | llm_complete(model="ollama/smollm2:360m", system_prompt="You are a helpful programming assistant.") }}
-"""
-
-[filters.llm_complete.examples.with_context]
-template = """
-{{ "Explain its importance." | llm_complete(model="ollama/smollm2:360m", context="We were discussing Python's role in data science.") }}
+{{ "What are the benefits of Python?" | llm_complete(model="ollama:smollm2:360m", system_prompt="You are a helpful programming assistant.") }}
 """

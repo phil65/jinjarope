@@ -24,7 +24,8 @@ Result: {{ v.template | render_string | md_style(code=True) }}
 {% endif %}
 {% endfilter %}
 {% endfor %}
-{{ f.filter_fn
+{#- objects defined in private modules (e.g. pathlib._abc) can't be collected by object, use the public path -#}
+{{ (f.fn if "._" in (f.filter_fn.__module__ or "") else f.filter_fn)
    | MkDocStrings(show_docstring_description=False, heading_level=4, filters=["!^_"])
    | MkAdmonition(collapsible=True, title="DocStrings")
 }}
