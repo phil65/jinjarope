@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import logging
 import os
 import tomllib
 from typing import TYPE_CHECKING, Any, Literal, Self
 
 import jinjarope
 from jinjarope import envconfig, envglobals, envtests, loaders, utils
+
+
+logger = logging.getLogger(__name__)
 
 
 if TYPE_CHECKING:
@@ -69,12 +73,7 @@ class JinjaFile(dict[str, Any]):
 
         Can directly get merged into env filters.
         """
-        dct = {}
-        for f in self.filters:
-            dct[f.identifier] = f.filter_fn
-            for alias in f.aliases:
-                dct[alias] = f.filter_fn
-        return dct
+        return _collect(self.filters)
 
     @property
     def tests_dict(self) -> dict[str, Callable[..., bool]]:
@@ -82,12 +81,7 @@ class JinjaFile(dict[str, Any]):
 
         Can directly get merged into env filters.
         """
-        dct = {}
-        for f in self.tests:
-            dct[f.identifier] = f.filter_fn
-            for alias in f.aliases:
-                dct[alias] = f.filter_fn
-        return dct
+        return _collect(self.tests)
 
     @property
     def functions_dict(self) -> dict[str, Callable[..., Any]]:
@@ -95,12 +89,7 @@ class JinjaFile(dict[str, Any]):
 
         Can directly get merged into env filters.
         """
-        dct = {}
-        for f in self.functions:
-            dct[f.identifier] = f.filter_fn
-            for alias in f.aliases:
-                dct[alias] = f.filter_fn
-        return dct
+        return _collect(self.functions)
 
     @property
     def envconfig(self) -> envconfig.EnvConfig:  # ty: ignore[missing-attribute]
@@ -112,6 +101,28 @@ class JinjaFile(dict[str, Any]):
     def loader(self) -> jinja2.BaseLoader | None:
         """Return a (composed Choice-) loader defined in this Jinja file."""
         return loaders.from_json(self.get("loaders", []))
+
+
+def _collect(items: list[JinjaItem]) -> dict[str, Callable[..., Any]]:
+    """Map identifiers and aliases to callables.
+
+    Items that declare ``required_packages`` are optional: if importing them fails
+    (e.g. an installed but incompatible optional dependency), they are skipped with
+    a warning instead of breaking the whole environment.
+    """
+    dct: dict[str, Callable[..., Any]] = {}
+    for item in items:
+        try:
+            fn = item.filter_fn
+        except ImportError as e:
+            if not item.required_packages:
+                raise
+            logger.warning("Skipping jinja item %r: %s", item.identifier, e)
+            continue
+        dct[item.identifier] = fn
+        for alias in item.aliases:
+            dct[alias] = fn
+    return dct
 
 
 @dataclasses.dataclass(frozen=True)
