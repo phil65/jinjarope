@@ -39,7 +39,7 @@ from jinjarope import (
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, MutableMapping, Sequence
+    from collections.abc import Callable, Generator, MutableMapping, Sequence
     from types import CodeType
 
     from jinja2.ext import Extension
@@ -60,6 +60,11 @@ class Environment(jinja2.Environment):
     loading Jinja files, managing undefined variables, and providing
     helper functions for rendering templates.
     """
+
+    # jinja2 leaves these unannotated, so checkers infer them from the defaults.
+    filters: dict[str, Callable[..., Any]]
+    tests: dict[str, Callable[..., bool]]
+    globals: dict[str, Any]
 
     def __init__(
         self,
@@ -687,7 +692,7 @@ class Environment(jinja2.Environment):
         # return self.concat(block_render_func(ctx))
 
     @contextlib.contextmanager
-    def with_globals(self, **kwargs: Any) -> Iterator[None]:
+    def with_globals(self, **kwargs: Any) -> Generator[None]:
         """Context manager to temporarily set globals for the environment.
 
         This context manager allows temporarily overriding the environment's
@@ -750,8 +755,8 @@ class Environment(jinja2.Environment):
         now = time.time()
         logger.debug("Evaluating code:\n%s", code)
         tree = ast.parse(code)
-        eval_expr = ast.Expression(tree.body[-1].value)  # type: ignore
-        # exec_expr = ast.Module(tree.body[:-1])  # type: ignore
+        eval_expr = ast.Expression(tree.body[-1].value)  # ty: ignore[missing-attribute]
+        # exec_expr = ast.Module(tree.body[:-1])
         exec_expr = ast.parse("")
         exec_expr.body = tree.body[:-1]
         compiled = compile(exec_expr, "file", "exec")

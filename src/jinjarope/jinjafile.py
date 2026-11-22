@@ -103,7 +103,7 @@ class JinjaFile(dict[str, Any]):
         return dct
 
     @property
-    def envconfig(self) -> envconfig.EnvConfig:
+    def envconfig(self) -> envconfig.EnvConfig:  # ty: ignore[missing-attribute]
         """Return the config object defined in this Jinja file."""
         cfg = self.get("config", {})
         return envconfig.EnvConfig(**cfg, loader=self.loader)
@@ -161,9 +161,9 @@ class JinjaItem:
             kwargs: Additional keyword arguments for JinjaItem ctor
         """
         return cls(
-            fn.__name__,
+            fn.__name__,  # ty: ignore[missing-attribute]
             typ=typ,
-            fn=f"{fn.__module__}.{fn.__name__}",
+            fn=f"{fn.__module__}.{fn.__name__}",  # ty: ignore[missing-attribute]
             group=group,
             **kwargs,
         )

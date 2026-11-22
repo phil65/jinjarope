@@ -35,6 +35,7 @@ dependencies = [
   "epregistry",
   "fsspec",
   "jinja2",
+  "markupsafe",
   "universal_pathlib",
   "upathtools",
 ]
@@ -51,12 +52,12 @@ cli = ["rich", "typer"]
 extras = ["black", "pygments", "humanize", "natsort"]
 httpx = ["httpx"]
 icons = ["pycons>=1.1.0"]
-llm = ["agentpool[litellm,pillow]"]
+llm = ["agentpool"]
 yaml = ["yamling"]
 
 [dependency-groups]
 dev = [
-  "mypy[faster-cache]",
+  "deptry",
   "pyinstrument",
   "pyreadline3",
   # test
@@ -69,7 +70,9 @@ docs = [
   "mkdocs-mknodes",
 ]
 lint = [
-  "ruff",
+  # Pinned on purpose: CI, pre-commit and editors all run exactly these versions.
+  "ruff==0.17.6",
+  "ty==0.0.107",
 ]
 
 [build-system]
@@ -85,6 +88,12 @@ exclude_lines = [
   'if __name__ == "__main__":',
 ]
 
+[tool.deptry.per_rule_ignores]
+# Referenced by string in resources/*.toml (`required_packages`) or used through typer.
+DEP002 = ["agentpool", "humanize", "pygments", "rich"]
+# babel is optional (guarded import); mknodes is only needed for the docs build (manual.py).
+DEP003 = ["babel", "mknodes"]
+
 [tool.mknodes]
 allowed-commit-types = [
   "fix",
@@ -96,15 +105,6 @@ allowed-commit-types = [
   "chore",
 ]
 docstring-style = "google"
-
-[tool.mypy]
-python_version = "3.13"
-# python_executable = ".venv/env/virtual/jinjarope/Scripts/python.exe"
-pretty = true
-strict = true
-check_untyped_defs = true
-exclude = ["venv/", ".venv/", "tests/"]
-plugins = ["pydantic.mypy"]
 
 [tool.pyright]
 venvPath = "."
@@ -256,6 +256,21 @@ combine-as-imports = true
 [tool.ruff.format]
 # Enable preview style formatting.
 preview = true
+
+[tool.ty.environment]
+python-version = "3.13"
+python-platform = "all"
+
+[tool.ty.src]
+# `ty check` (hooks, CI, editors) type-checks the package code only.
+include = ["src"]
+
+[tool.ty.analysis]
+# Optional dependencies that are not always installed.
+allowed-unresolved-imports = []
+
+[tool.ty.rules]
+incompatible-mutable-override = "ignore"
 
 [tool.uv]
 default-groups = ["dev", "lint", "docs"]

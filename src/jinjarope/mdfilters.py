@@ -146,9 +146,9 @@ def autoref_link(
             link = link.__name__
         case _ if callable(link):
             if (mod := link.__module__) != "builtins":
-                link = f"{mod}.{link.__qualname__}"
+                link = f"{mod}.{link.__qualname__}"  # ty: ignore[missing-attribute]
             else:
-                link = link.__qualname__
+                link = link.__qualname__  # ty: ignore[missing-attribute]
 
     return f"[{text or link}][{link}]"
 

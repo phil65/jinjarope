@@ -2,46 +2,56 @@ name: Build
 
 on: [push, pull_request]
 
+env:
+  FORCE_COLOR: 1
+  RUFF_OUTPUT_FORMAT: github
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         python_version: ["3.13", "3.14"]
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python_version }}
+          allow-prereleases: true
 
       - name: Install uv
-        uses: yezz123/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+          cache-suffix: py${{ matrix.python_version }}
+          python-version: ${{ matrix.python_version }}
 
       - name: Install dependencies (uv sync)
-        run: uv sync --all-extras
+        run: uv sync --all-extras --no-group docs
 
+      # ruff / ty come from the pinned `lint` group, same versions as pre-commit.
       - name: Check for code issues (ruff check)
-        uses: astral-sh/ruff-action@v1
+        run: uv run --no-group docs ruff check .
 
       - name: Check code format (ruff format)
-        uses: astral-sh/ruff-action@v1
-        with:
-          args: "format --check"
+        run: uv run --no-group docs ruff format --check .
 
-      - name: Static type checking (MyPy)
-        run: uv run mypy src/jinjarope/
+      - name: Static type checking (ty)
+        run: uv run --no-group docs ty check
 
       - name: Run tests
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: uv run pytest --cov-report=xml
+        run: uv run --no-group docs pytest --cov-report=xml
 
       - name: Upload test results to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
@@ -49,6 +59,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: test
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
@@ -57,15 +68,15 @@ jobs:
       contents: write
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
       - name: Install uv
-        uses: yezz123/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
 
       - name: Build package
         run: uv build

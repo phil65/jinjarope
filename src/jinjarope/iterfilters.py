@@ -269,7 +269,7 @@ def groupby_first_letter[T](
         data: Iterable to group
         keyfunc: Optional alternative sort function
     """
-    data = sorted(data, key=keyfunc or (lambda x: x))
+    data = sorted(data, key=keyfunc or (lambda x: x))  # ty: ignore[no-matching-overload]
 
     def first_letter(x: Any) -> Any:
         return keyfunc(x)[0].upper() if keyfunc else x[0].upper()

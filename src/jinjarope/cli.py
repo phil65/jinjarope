@@ -74,7 +74,7 @@ def render(
     for path in cfg_files:
         env.load_jinja_file(path)
     if undefined:
-        env.set_undefined(undefined)  # type: ignore[arg-type]
+        env.set_undefined(undefined)  # ty: ignore[invalid-argument-type]
     if trim_blocks is not None:
         env.trim_blocks = trim_blocks
     text = env.render_file(template_path)

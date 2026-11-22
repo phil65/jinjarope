@@ -114,7 +114,7 @@ class LoaderRegistry:
             case (types.ModuleType() as mod,):
                 return loaders.PackageLoader(mod)
             case (fn,) if callable(fn):
-                return loaders.FunctionLoader(fn)
+                return loaders.FunctionLoader(fn)  # ty: ignore[invalid-argument-type]
         m_paths = iterfilters.reduce_list(module_paths or [])
         loader = loaders.ChoiceLoader([self.get_package_loader(p) for p in m_paths])
         for file in iterfilters.reduce_list(dir_paths or []):

@@ -71,7 +71,7 @@ class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):  # type: ignore[misc]
             return True
 
     @override
-    def cat_file(self, path: str, **kwargs: Any) -> bytes:
+    def cat_file(self, path: str, **kwargs: Any) -> bytes:  # ty: ignore[incompatible-method-override]
         """Get contents of file as bytes.
 
         Args:
@@ -96,7 +96,7 @@ class JinjaLoaderFileSystem(fsspec.AbstractFileSystem):  # type: ignore[misc]
             raise FileNotFoundError(msg) from exc
 
     @override
-    def cat(self, path: str | list[str], **kwargs: Any) -> bytes | dict[str, bytes]:
+    def cat(self, path: str | list[str], **kwargs: Any) -> bytes | dict[str, bytes]:  # ty: ignore[incompatible-method-override]
         """Get contents of file(s).
 
         Args:

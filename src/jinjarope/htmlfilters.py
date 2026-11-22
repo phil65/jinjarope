@@ -491,7 +491,7 @@ def inject_javascript[ContentType: (str, bytes)](
         msg = f"Could not find {position} tag in HTML content"
         raise ValueError(msg)
     # Return the same type as input
-    return modified_content.encode() if is_bytes else modified_content  # type: ignore[return-value]
+    return modified_content.encode() if is_bytes else modified_content  # ty: ignore[invalid-explicit-return]
 
 
 if __name__ == "__main__":

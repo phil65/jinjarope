@@ -11,10 +11,7 @@ from jinjarope import inspectfilters, utils
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
-
-    from fsspec.utils import Iterator  # type: ignore[import-untyped]
-    from jinja2 import BaseLoader
+    from collections.abc import Callable, Iterator
 
 
 class LoaderMixin:
@@ -29,7 +26,7 @@ class LoaderMixin:
     def __or__(self, other: jinja2.BaseLoader) -> ChoiceLoader:
         own = self.loaders if isinstance(self, jinja2.ChoiceLoader) else [self]
         others = other.loaders if isinstance(other, jinja2.ChoiceLoader) else [other]
-        return ChoiceLoader([*own, *others])  # pyright: ignore[reportArgumentType]
+        return ChoiceLoader([*own, *others])  # ty: ignore[invalid-argument-type]
 
     def __getitem__(self, val: str) -> jinja2.Template:
         """Return the template object for given template path."""
@@ -50,7 +47,7 @@ class LoaderMixin:
         Args:
             prefix: The prefix to use
         """
-        return PrefixLoader({prefix: self})  # type: ignore[dict-item]
+        return PrefixLoader({prefix: self})  # ty: ignore[invalid-argument-type]
 
     def get_template_source(self, template_path: str) -> str:
         """Return the source for given template path."""
@@ -76,7 +73,7 @@ class PrefixLoader(LoaderMixin, jinja2.PrefixLoader):
     def __bool__(self) -> bool:
         return bool(self.mapping)
 
-    def __iter__(self) -> Iterator[Mapping[str, BaseLoader]]:
+    def __iter__(self) -> Iterator[str]:
         return iter(self.mapping)
 
 

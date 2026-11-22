@@ -9,7 +9,7 @@ from jinja2.ext import Extension, InternationalizationExtension
 
 try:
     from babel.core import Locale, UnknownLocaleError  # pyright: ignore
-    from babel.support import NullTranslations, Translations
+    from babel.support import Translations
 
     HAS_BABEL = True
 except ImportError:  # pragma: no cover
@@ -100,9 +100,9 @@ def install_translations(
         env.add_extension("jinja2.ext.i18n")
         translations = _get_merged_translations(dirs, "locales", locale)
         if translations is not None:
-            env.install_gettext_translations(translations)  # type: ignore[attr-defined]
+            env.install_gettext_translations(translations)  # ty: ignore[missing-attribute]
         else:
-            env.install_null_translations()  # type: ignore[attr-defined]
+            env.install_null_translations()  # ty: ignore[missing-attribute]
             if locale.language != "en":
                 logger.warning(
                     "Translations couldnt be found for locale %r, defaulting to English",
@@ -111,7 +111,7 @@ def install_translations(
     else:  # pragma: no cover
         # no babel installed, add dummy support for trans/endtrans blocks
         env.add_extension(NoBabelExtension)
-        env.install_null_translations()  # type: ignore[attr-defined]
+        env.install_null_translations()  # ty: ignore[missing-attribute]
 
 
 def _get_merged_translations(
@@ -127,7 +127,7 @@ def _get_merged_translations(
     Returns:
         Merged translations object or None if no translations are found.
     """
-    merged_translations: NullTranslations | None = None
+    merged_translations: Translations | None = None
 
     logger.debug("Looking for translations for locale %r", locale)
     locale_str = f"{locale.language}_{locale.territory}" if locale.territory else locale.language
@@ -135,13 +135,13 @@ def _get_merged_translations(
         dirname = pathlib.Path(theme_dir) / locales_dir
         translations = Translations.load(dirname, [locale_str])
 
-        if type(translations) is NullTranslations:
+        if not isinstance(translations, Translations):
             logger.debug("No translations found in: %r", dirname)
             continue
         logger.debug("Translations found in: %r", dirname)
         if merged_translations is None:
             merged_translations = translations
         else:
-            merged_translations.merge(translations)  # type: ignore[attr-defined]
+            merged_translations.merge(translations)
 
-    return merged_translations  # type: ignore[return-value]
+    return merged_translations

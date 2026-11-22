@@ -11,7 +11,7 @@ UndefinedStr = Literal["keep", "silent", "strict", "lax"]
 class LaxUndefined(jinja2.Undefined):
     """Pass anything wrong as blank."""
 
-    def _fail_with_undefined_error(self, *args: Any, **kwargs: Any) -> str:  # type: ignore[override]
+    def _fail_with_undefined_error(self, *args: Any, **kwargs: Any) -> str:  # ty: ignore[incompatible-method-override]
         return ""
 
 
