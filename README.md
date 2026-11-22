@@ -19,7 +19,6 @@
 [![Implementation](https://img.shields.io/pypi/implementation/jinjarope.svg)](https://pypi.org/project/jinjarope/)
 [![Releases](https://img.shields.io/github/downloads/phil65/jinjarope/total.svg)](https://github.com/phil65/jinjarope/releases)
 [![Github Contributors](https://img.shields.io/github/contributors/phil65/jinjarope)](https://github.com/phil65/jinjarope/graphs/contributors)
-[![Github Discussions](https://img.shields.io/github/discussions/phil65/jinjarope)](https://github.com/phil65/jinjarope/discussions)
 [![Github Forks](https://img.shields.io/github/forks/phil65/jinjarope)](https://github.com/phil65/jinjarope/forks)
 [![Github Issues](https://img.shields.io/github/issues/phil65/jinjarope)](https://github.com/phil65/jinjarope/issues)
 [![Github Issues](https://img.shields.io/github/issues-pr/phil65/jinjarope)](https://github.com/phil65/jinjarope/pulls)
@@ -33,41 +32,59 @@
 [![Github commits this month](https://img.shields.io/github/commit-activity/m/phil65/jinjarope)](https://github.com/phil65/jinjarope)
 [![Github commits this year](https://img.shields.io/github/commit-activity/y/phil65/jinjarope)](https://github.com/phil65/jinjarope)
 [![Package status](https://codecov.io/gh/phil65/jinjarope/branch/main/graph/badge.svg)](https://codecov.io/gh/phil65/jinjarope/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![PyUp](https://pyup.io/repos/github/phil65/jinjarope/shield.svg)](https://pyup.io/repos/github/phil65/jinjarope/)
 
 [Read the documentation!](https://phil65.github.io/jinjarope/)
 
-## How to install
+**jinjarope** is a toolkit for [Jinja2](https://jinja.palletsprojects.com/): an enhanced
+`Environment` with a large set of extra filters, tests and globals, loaders for
+[fsspec](https://filesystem-spec.readthedocs.io/) filesystems and nested dicts, composable
+loader classes, and TOML-based "JinjaFiles" to declare filters / tests / environment config.
 
-### pip
+## Installation
 
-The latest released version is available at the [Python package index](https://pypi.org/project/mknodes).
-
-``` py
+```bash
 pip install jinjarope
 ```
-With CLI:
 
-``` py
-pip install jinjarope[cli]
+Optional extras: `cli` (command line interface), `extras` (formatting, highlighting, humanize,
+natsort filters), `httpx`, `icons` (icon filters), `llm` (`llm_complete` filter via agentpool),
+`yaml`.
+
+```bash
+pip install "jinjarope[cli]"
 ```
 
+## Quickstart
 
-## Quick guide
+```python
+import jinjarope
 
-Jinjarope contains a range of Jinja2 loaders (including fsspec-based ones) as well as a `jinja2.Environment` subclass with added functionality.
+env = jinjarope.Environment(loader=jinjarope.DictLoader({"hello.jinja": "Hello {{ name }}!"}))
+print(env.render_template("hello.jinja", name="World"))  # Hello World!
+print(env.render_string("{{ 'Hello World' | slugify }}"))  # hello_world
+```
 
-For debugging purposes, an FsSpec filesystem implementation for jinja2 loaders is also included.
+## Features
 
+- `jinjarope.Environment`: drop-in `jinja2.Environment` subclass with ~150 additional
+  filters / tests / functions, `render_string` / `render_file` / `render_template`,
+  `with_globals()`, selectable undefined behavior (`"strict"`, `"lax"`, ...), and an
+  entry-point (`jinjarope.environment`) to let other packages extend every environment.
+- Subclasses of all jinja2 loaders with `__eq__`, `__hash__`, `__repr__` and `__getitem__`,
+  plus fsspec-based and dict-based loaders.
+- JinjaFiles: TOML files declaring filters, tests, functions and environment config.
+- A read-only fsspec filesystem exposing a loader's templates (for debugging).
+- A `jinjarope` CLI to render (remote) templates: `jinjarope -i template.jinja -j config.toml -o out.md` (with the `cli` extra).
 
 ### FsSpecFileSystemLoader
 
-This loader can be used like a FileSystemLoader, but also works on any fsspec-supported
-remote path.
+Works like a `FileSystemLoader`, but on any fsspec-supported (remote) location.
 Using the `dir::` prefix, any folder can be set as root.
 
-``` py
+```python
+import fsspec
+import jinjarope
+
 # protocol path
 loader = jinjarope.FsSpecFileSystemLoader("dir::github://phil65:jinjarope@main/tests/testresources")
 env = jinjarope.Environment(loader=loader)
@@ -85,55 +102,48 @@ env = jinjarope.Environment(loader=loader)
 env.get_template("README.md").render()
 ```
 
-
 ### FsSpecProtocolPathLoader
 
-This loader accepts any FsSpec protocol path to be used directly.
-A complete protocol URL to the template file is required.
+Accepts complete fsspec protocol paths as template names.
 
-``` py
+```python
 loader = jinjarope.FsSpecProtocolPathLoader()
 env = jinjarope.Environment(loader=loader)
 env.get_template("github://phil65:jinjarope@main/tests/testresources/testfile.jinja").render()
 ```
 
-
 ### NestedDictLoader
 
-``` toml
+```toml
 [example]
 template = "{{ something }}"
 ```
-``` py
-content = tomllib.load(toml_file)
+
+```python
+import tomllib
+
+with open("templates.toml", "rb") as toml_file:
+    content = tomllib.load(toml_file)
 loader = jinjarope.NestedDictLoader(content)
 env = jinjarope.Environment(loader=loader)
-env.get_template("example/template")
+env.get_template("example/template").render(something="value")
 ```
 
+### Loader composition
 
-### General loader information
+```python
+loader = jinjarope.FileSystemLoader("templates/")
+template = loader["path/to/template.jinja"]  # jinja2.Template
+source = loader.get_template_source("path/to/template.jinja")
 
-**jinjarope** also contains subclasses for all default **jinja2** loaders. These loaders
-have implementations for some magic methods (`__eq__`, `__hash__`, `__repr__`, , `__getitem__`).
+# OR loaders to get a ChoiceLoader
+choice_loader = jinjarope.FileSystemLoader("templates/") | jinjarope.PackageLoader("my_package")
 
-``` py
-loader = jinjarope.FileSystemLoader(...)
-template_source = loader["path/to/template.jinja"]
+# pathlib-style division creates a PrefixLoader
+prefix_loader = "path_prefix" / jinjarope.FileSystemLoader("templates/")
 ```
 
-The loaders can also get ORed to return a ChoiceLoader.
+### Filters, tests and functions
 
-``` py
-choice_loader = jinjarope.FileSystemLoader(..) | jinjarope.PackageLoader(...)
-```
-
-Prefix loaders can get created using pathlib-style string concatenations
-
-``` py
-prefix_loader = "path_prefix" / jinjarope.FileSystemLoader(...)
-```
-
-### Additional filters / tests
-
-Check out the documentation for a list of built-in filters and tests!
+See the [documentation](https://phil65.github.io/jinjarope/) for the full list of built-in
+filters, tests and functions with examples.
