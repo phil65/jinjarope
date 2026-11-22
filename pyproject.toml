@@ -73,7 +73,8 @@ dev = [
 ]
 docs = [
   "mkdocs-material",
-  "mkdocs-mknodes",
+  "mkdocs-mknodes>=2.1.0",
+  "mkdocstrings[python]",
 ]
 lint = [
   # Pinned on purpose: CI, pre-commit and editors all run exactly these versions.
