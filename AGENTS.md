@@ -75,7 +75,7 @@ don't run it unless asked).
 ## Pitfalls
 
 - Not copier-managed: edit config files directly.
-- Optional deps (extras `cli`, `extras`, `httpx`, `icons`, `llm`, `yaml`) must only be
+- Optional deps (extras `cli`, `extras`, `httpx`/`httpx2`, `icons`, `llm`, `yaml`) must only be
   imported lazily or through TOML `fn` paths; `import jinjarope` must work with the core deps.
 - Examples that need a model or network (e.g. `llm_complete` in `llm_filters.toml`) set
   `render = false`, so the docs show the template without executing it.

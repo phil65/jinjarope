@@ -56,7 +56,8 @@ jinjarope = "jinjarope.cli:cli"
 [project.optional-dependencies]
 cli = ["rich", "typer"]
 extras = ["black", "pygments", "humanize", "natsort"]
-httpx = ["httpx"]
+httpx = ["httpx2>=2.16"]  # kept for compatibility, installs httpx2
+httpx2 = ["httpx2>=2.16"]
 icons = ["pycons>=1.1.0"]
 llm = ["agentpool"]
 yaml = ["yamling"]

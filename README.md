@@ -47,8 +47,8 @@ pip install jinjarope
 ```
 
 Optional extras: `cli` (command line interface), `extras` (formatting, highlighting, humanize,
-natsort filters), `httpx`, `icons` (icon filters), `llm` (`llm_complete` filter via agentpool),
-`yaml`.
+natsort filters), `httpx2` (alias `httpx`), `icons` (icon filters), `llm` (`llm_complete`
+filter via agentpool), `yaml`.
 
 ```bash
 pip install "jinjarope[cli]"

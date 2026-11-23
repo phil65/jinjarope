@@ -299,7 +299,7 @@ template = """
 fn = "jinjarope.htmlfilters.url_to_b64"
 group = "html"
 icon = "mdi:base64"
-required_packages = ["httpx"]
+required_packages = ["httpx2"]
 
 [filters.url_to_b64.examples.basic]
 template = """

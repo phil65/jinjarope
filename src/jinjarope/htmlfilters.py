@@ -422,12 +422,12 @@ def url_to_b64(image_url: str) -> str | None:
         The base64-encoded string of the image.
 
     Raises:
-        requests.RequestException: If there's an error downloading the image.
+        httpx2.HTTPError: If there's an error downloading the image.
     """
-    import httpx
+    import httpx2
 
     # Download the image
-    with httpx.Client(follow_redirects=True) as client:
+    with httpx2.Client(follow_redirects=True) as client:
         response = client.get(image_url)
         response.raise_for_status()
         image_data = response.content
