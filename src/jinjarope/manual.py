@@ -23,7 +23,10 @@ def table_for_items(items: list[JinjaItem]) -> mk.MkTable:
     t = mk.MkTable(columns=["Name", "Description"])
     for item in items:
         link = mdfilters.autoref_link(item.identifier, item.identifier)
-        doc = inspectfilters.get_doc(item.filter_fn, only_summary=True)
+        try:
+            doc = inspectfilters.get_doc(item.filter_fn, only_summary=True)
+        except ImportError:  # optional dependency installed but broken
+            doc = "*(unavailable: its dependency can't be imported)*"
         t.add_row((link, doc))
     return t
 
