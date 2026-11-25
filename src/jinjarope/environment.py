@@ -176,8 +176,13 @@ class Environment(jinja2.Environment):
         self.load_jinja_file(folder / "humanize_filters.toml")
         self.load_jinja_file(folder / "llm_filters.toml")
         self.globals.update(envglobals.ENV_GLOBALS)
-        for fn in utils.entry_points(group="jinjarope.environment").values():
-            fn(self)
+        for name, fn in utils.entry_points(group="jinjarope.environment").items():
+            # A broken plugin (e.g. an incompatible dependency of another package)
+            # must not break every environment: skip it with a warning.
+            try:
+                fn(self)
+            except Exception:
+                logger.warning("jinjarope.environment plugin %r failed", name, exc_info=True)
         self.filters["render_template"] = self.render_template
         self.filters["render_string"] = self.render_string
         self.filters["render_file"] = self.render_file
