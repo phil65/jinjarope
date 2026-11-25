@@ -56,7 +56,7 @@ uv run pytest                     # tests
 uv run ruff check . && uv run ruff format --check .
 uv run ty check                   # must exit 0; warnings fail too
 uv run deptry src                 # dependency hygiene
-uv run mkdocs-mknodes build       # docs (or: uv run duty build / duty serve)
+uv run mknodes build       # docs (or: uv run duty build / duty serve)
 uv build
 ```
 

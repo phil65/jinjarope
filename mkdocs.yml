@@ -57,15 +57,6 @@ theme:
 plugins:
   - search
   - autorefs
-  - mknodes:
-      build_fn: jinjarope.manual:Build.build
-      # global_resources: false
-      render_by_default: false
-      # jinja_loaders:
-      # - type: filesystem
-      #   searchpath: docs
-      # - type: template_file
-      #   path: templates.toml
   - mkdocstrings:
       default_handler: python
       handlers:
