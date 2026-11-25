@@ -106,23 +106,48 @@ class JinjaFile(dict[str, Any]):
 def _collect(items: list[JinjaItem]) -> dict[str, Callable[..., Any]]:
     """Map identifiers and aliases to callables.
 
-    Items that declare ``required_packages`` are optional: if importing them fails
-    (e.g. an installed but incompatible optional dependency), they are skipped with
-    a warning instead of breaking the whole environment.
+    The callables are lazy: the target gets imported on first use. Creating an
+    environment therefore doesn't import every library a filter file refers to
+    (e.g. the LLM filters import agentpool, which takes seconds). Items with missing
+    ``required_packages`` are left out; a target that fails to import raises on use.
     """
     dct: dict[str, Callable[..., Any]] = {}
     for item in items:
-        try:
-            fn = item.filter_fn
-        except ImportError as e:
-            if not item.required_packages:
-                raise
-            logger.warning("Skipping jinja item %r: %s", item.identifier, e)
-            continue
+        fn = item.lazy_fn
         dct[item.identifier] = fn
         for alias in item.aliases:
             dct[alias] = fn
     return dct
+
+
+class LazyCallable:
+    """Callable proxy importing the target of a `JinjaItem` on first use.
+
+    Attribute access is forwarded to the target, so Jinja sees `jinja_pass_arg`
+    (`@pass_context` & co.) and `inspect` sees the signature (via `__wrapped__`).
+    """
+
+    __slots__ = ("_item", "_target")
+
+    def __init__(self, item: JinjaItem) -> None:
+        self._item = item
+        self._target: Callable[..., Any] | None = None
+
+    @property
+    def __wrapped__(self) -> Callable[..., Any]:
+        if self._target is None:
+            self._target = self._item.filter_fn
+        return self._target
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return self.__wrapped__(*args, **kwargs)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.__wrapped__, name)
+
+    def __repr__(self) -> str:
+        state = "resolved" if self._target is not None else "lazy"
+        return f"{type(self).__name__}({self._item.fn!r}, {state})"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -144,7 +169,7 @@ class JinjaItem:
 
     @property
     def filter_fn(self) -> Callable[..., Any]:
-        """Return the callable to use as filter / test / function."""
+        """Return the callable to use as filter / test / function (imported now)."""
         try:
             obj = utils.resolve(self.fn)
         except AttributeError:
@@ -154,6 +179,11 @@ class JinjaItem:
             msg = "Filter needs correct, importable Path for callable"
             raise TypeError(msg)
         return obj  # type: ignore[no-any-return]
+
+    @functools.cached_property
+    def lazy_fn(self) -> LazyCallable:
+        """Return a callable which imports the filter / test / function on first use."""
+        return LazyCallable(self)
 
     @classmethod
     def for_function(
