@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import builtins
 import datetime as dt
+import functools
 import inspect
 import math
 import os
@@ -174,8 +175,11 @@ def contains_files(directory: str | os.PathLike[str]) -> bool:
     return path.exists() and any(path.iterdir())
 
 
+@functools.cache
 def is_installed(package_name: str) -> bool:
     """Returns true if a package with given name is found.
+
+    Cached per process (checked for every item of every loaded Jinja file).
 
     Args:
         package_name: The package name to check

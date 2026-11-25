@@ -267,15 +267,13 @@ class Environment(jinja2.Environment):
             load_loader: Whether to load the Loader from the JinjaFile
         """
         file = jinjafile.JinjaFile(path)
+        filters, tests, functions = jinjafile.load_items(path)
         if load_filters:
-            dct = {f"{scope_prefix}{k}": v for k, v in file.filters_dict.items()}
-            self.filters.update(dct)
+            self.filters.update({f"{scope_prefix}{k}": v for k, v in filters.items()})
         if load_tests:
-            dct = {f"{scope_prefix}{k}": v for k, v in file.tests_dict.items()}
-            self.tests.update(dct)
+            self.tests.update({f"{scope_prefix}{k}": v for k, v in tests.items()})
         if load_functions:
-            dct = {f"{scope_prefix}{k}": v for k, v in file.functions_dict.items()}
-            self.globals.update(dct)
+            self.globals.update({f"{scope_prefix}{k}": v for k, v in functions.items()})
         if load_config:
             self.block_start_string = file.envconfig.block_start_string
             self.block_end_string = file.envconfig.block_end_string

@@ -103,6 +103,32 @@ class JinjaFile(dict[str, Any]):
         return loaders.from_json(self.get("loaders", []))
 
 
+type ItemDicts = tuple[dict[str, Any], dict[str, Any], dict[str, Any]]
+
+
+def load_items(path: str | os.PathLike[str]) -> ItemDicts:
+    """Return (filters, tests, functions) of given Jinja file, cached per file version.
+
+    Environments get created often (one per node in MkNodes); parsing the TOML and
+    checking `required_packages` again for each of them is wasted work.
+    """
+    resolved = os.path.abspath(os.fspath(path))  # noqa: PTH100
+    try:
+        mtime = os.stat(resolved).st_mtime_ns  # noqa: PTH116
+    except OSError:  # remote / virtual paths: no caching
+        file = JinjaFile(path)
+        return file.filters_dict, file.tests_dict, file.functions_dict
+    return _load_items_cached(resolved, mtime)
+
+
+@functools.cache
+def _load_items_cached(
+    path: str, mtime: int
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    file = JinjaFile(path)
+    return file.filters_dict, file.tests_dict, file.functions_dict
+
+
 def _collect(items: list[JinjaItem]) -> dict[str, Callable[..., Any]]:
     """Map identifiers and aliases to callables.
 
