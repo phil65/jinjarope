@@ -199,7 +199,7 @@ def get_doc(
                 try:
                     module = importlib.import_module(module_path)
                     obj = getattr(module, obj_name)
-                except (ImportError, AttributeError):
+                except ImportError, AttributeError:
                     # Maybe the whole thing is a module?
                     try:
                         obj = importlib.import_module(obj)

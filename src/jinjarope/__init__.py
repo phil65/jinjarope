@@ -18,7 +18,10 @@ from .configloaders import NestedDictLoader, TemplateFileLoader
 from .fsspecloaders import FsSpecFileSystemLoader, FsSpecProtocolPathLoader
 from .loaderregistry import LoaderRegistry
 from .jinjafile import JinjaFile, JinjaItem
-from jinja2 import BaseLoader
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from jinja2 import BaseLoader
 
 registry = LoaderRegistry()
 

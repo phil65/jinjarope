@@ -24,7 +24,7 @@ def is_number(value: Any) -> bool:
     """Try to convert value to a float."""
     try:
         fvalue = float(value)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return False
     return math.isfinite(fvalue)
 

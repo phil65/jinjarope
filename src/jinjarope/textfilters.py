@@ -139,7 +139,7 @@ def format_signature(
     if eval_str:
         try:
             sig = inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=True)
-        except (TypeError, NameError):
+        except TypeError, NameError:
             sig = inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=False)
     else:
         sig = inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=False)
