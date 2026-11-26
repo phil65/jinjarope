@@ -1,18 +1,18 @@
 from __future__ import annotations
 
+import collections
 import datetime as dt
 import logging
+import os
 import pathlib
+import threading
 from typing import TYPE_CHECKING, Any
 
 import upath
 
-from jinjarope import decorators as dec
-
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
-    import os
 
     from jinjarope.utils import AnyPath
 
@@ -20,19 +20,65 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@dec.cache_with_transforms(arg_transformers={0: lambda p: upath.UPath(p).resolve()})
+FILE_CACHE_SIZE = 256
+"""How many files `load_file_cached` keeps (least recently used ones go first)."""
+
+_file_cache: collections.OrderedDict[tuple[Any, ...], str] = collections.OrderedDict()
+_file_cache_lock = threading.Lock()
+
+
+def _local_file(path: AnyPath) -> str | None:
+    """The absolute path of a local file, None for remote / virtual paths."""
+    if isinstance(path, str):
+        if path.startswith("file://"):
+            path = path.removeprefix("file://")
+        elif "://" in path:
+            return None
+    if isinstance(path, str | os.PathLike):
+        return os.path.abspath(os.fspath(path))  # noqa: PTH100
+    return None  # UPaths of other file systems aren't os.PathLike
+
+
+def _read_text(path: AnyPath) -> str:
+    from upathtools import to_upath
+
+    return to_upath(path).read_text("utf-8")
+
+
 def load_file_cached(path: AnyPath) -> str:
     """Return the text-content of file at given path.
 
-    Call is cached based on resolved file path.
-    Also supports fsspec-style URLs and UPaths.
+    Local files are cached by path and modification time (edits are seen); other
+    paths (fsspec-style URLs and UPaths) by URL. The cache keeps the last
+    `FILE_CACHE_SIZE` files.
 
     Args:
         path: The path to get str content from
     """
-    from upathtools import to_upath
+    if (local := _local_file(path)) is not None:
+        try:
+            stat = os.stat(local)  # noqa: PTH116
+        except OSError:
+            return _read_text(path)  # raises the file system's error
+        key: tuple[Any, ...] = (local, stat.st_mtime_ns, stat.st_size)
+    else:
+        key = (str(upath.UPath(path)),)
+    with _file_cache_lock:
+        if (text := _file_cache.get(key)) is not None:
+            _file_cache.move_to_end(key)
+            return text
+    text = _read_text(path)
+    with _file_cache_lock:
+        _file_cache[key] = text
+        while len(_file_cache) > FILE_CACHE_SIZE:
+            _file_cache.popitem(last=False)
+    return text
 
-    return to_upath(path).read_text("utf-8")
+
+def clear_file_cache() -> None:
+    """Forget the files `load_file_cached` read."""
+    with _file_cache_lock:
+        _file_cache.clear()
 
 
 _cache: dict[str, str] = {}
