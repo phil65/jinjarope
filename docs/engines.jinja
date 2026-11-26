@@ -71,12 +71,12 @@ Differences in templates:
 | `"%s" % x` | not supported | `"{}".format(x)`, `format` filter |
 | `{% do expr %}` | only call expressions (`{% do f() %}`) | |
 | namedtuples keep their attributes | converted to sequences (`p.a` undefined) | |
-| dict literals with non-string keys (`{int: "x"}`) | keys become strings | |
 | `1 / 0` raises `ZeroDivisionError` | minijinja error (`unable to calculate`) | |
 | `escape`: `&#34;` | `&quot;` | |
 | `pprint`: one line | indented | |
 | `urlencode`: spaces as `+` | `%20` | |
 | `"\a"` and other Python escapes in string literals | `\a` stays | |
+| `x is filter` / `x is test` for any value | names (strings) only | |
 | `filters` / `tests` globals include Jinja2's built-ins | only jinjarope's (Python) ones | |
 | `parent_template` of `render_template` | ignored (names are not relative, as in Jinja2 by default) | |
 
