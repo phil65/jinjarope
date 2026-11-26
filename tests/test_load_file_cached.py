@@ -58,3 +58,23 @@ def test_http_urls_go_through_upathtools(monkeypatch):
     monkeypatch.setattr(envglobals, "_read_text", lambda p: f"from {p}")
     url = "https://example.com/t.jinja"
     assert envglobals.load_file_cached(url) == f"from {url}"
+
+
+def test_http_urls_use_anyenv(monkeypatch):
+    """http(s) URLs go through anyenv (no aiohttp needed) and are cached by URL."""
+    import anyenv
+
+    from jinjarope import envglobals
+
+    calls: list[str] = []
+
+    def fake_get_text_sync(url: str) -> str:
+        calls.append(url)
+        return "remote text"
+
+    monkeypatch.setattr(anyenv, "get_text_sync", fake_get_text_sync)
+    envglobals.clear_file_cache()
+    url = "https://example.invalid/some/file.md"
+    assert envglobals.load_file_cached(url) == "remote text"
+    assert envglobals.load_file_cached(url) == "remote text"
+    assert calls == [url]

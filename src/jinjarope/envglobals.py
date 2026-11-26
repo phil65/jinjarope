@@ -36,6 +36,13 @@ def _local_file(path: AnyPath) -> str | None:
 
 
 def _read_text(path: AnyPath) -> str:
+    url = str(path)
+    if url.startswith(("http://", "https://")):
+        # anyenv's HTTP client (httpx2), not fsspec's HTTPFileSystem: that one needs
+        # aiohttp, which jinjarope doesn't depend on.
+        import anyenv
+
+        return anyenv.get_text_sync(url)
     from upathtools import to_upath
 
     return to_upath(path).read_text("utf-8")
