@@ -1,11 +1,6 @@
-import ast
-import contextlib
-import io
 import logging
-import os
 import pathlib
-import time
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 import weakref
 
 import jinja2
@@ -25,11 +20,11 @@ from jinja2.defaults import (
 from jinja2.exceptions import TemplateSyntaxError
 import jinja2.nodes
 
-import jinjarope
 from jinjarope import (
+    engine,
+    envbase,
     envconfig,
     envglobals,
-    jinjafile,
     loaders,
     undefined as undefined_,
     utils,
@@ -37,7 +32,8 @@ from jinjarope import (
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, MutableMapping, Sequence
+    from collections.abc import Callable, MutableMapping, Sequence
+    import os
     from types import CodeType
 
     from jinja2.ext import Extension
@@ -51,7 +47,7 @@ class Context(jinja2.runtime.Context):
         return "Context()"
 
 
-class Environment(jinja2.Environment):
+class Environment(envbase.EnvironmentBase, jinja2.Environment):
     """An enhanced Jinja environment.
 
     This class extends the Jinja2 environment with functionality for
@@ -59,6 +55,7 @@ class Environment(jinja2.Environment):
     helper functions for rendering templates.
     """
 
+    engine_name: ClassVar[str] = "jinja2"
     # jinja2 leaves these unannotated, so checkers infer them from the defaults.
     filters: dict[str, Callable[..., Any]]
     tests: dict[str, Callable[..., bool]]
@@ -166,28 +163,7 @@ class Environment(jinja2.Environment):
             bytecode_cache=bytecode_cache,
             enable_async=enable_async,
         )
-        # Update namespaces
-        folder = pathlib.Path(__file__).parent / "resources"
-        self.load_jinja_file(folder / "filters.toml")
-        self.load_jinja_file(folder / "tests.toml")
-        self.load_jinja_file(folder / "functions.toml")
-        self.load_jinja_file(folder / "humanize_filters.toml")
-        self.load_jinja_file(folder / "llm_filters.toml")
-        self.globals.update(envglobals.ENV_GLOBALS)
-        for name, fn in utils.entry_points(group="jinjarope.environment").items():
-            # A broken plugin (e.g. an incompatible dependency of another package)
-            # must not break every environment: skip it with a warning.
-            try:
-                fn(self)
-            except Exception:
-                logger.warning("jinjarope.environment plugin %r failed", name, exc_info=True)
-        self.filters["render_template"] = self.render_template
-        self.filters["render_string"] = self.render_string
-        self.filters["render_file"] = self.render_file
-        self.filters["evaluate"] = self.evaluate
-        self.globals["filters"] = self.filters
-        self.globals["tests"] = self.tests
-        self.tests["template"] = lambda template_name: template_name in self
+        self._install_defaults()
         self.template_cache: weakref.WeakValueDictionary[
             str | jinja2.nodes.Template,
             CodeType | str | None,
@@ -236,6 +212,22 @@ class Environment(jinja2.Environment):
 
         localization.install_translations(self, locale, dirs)
 
+    def _apply_envconfig(self, cfg: envconfig.EnvConfig) -> None:
+        self.block_start_string = cfg.block_start_string
+        self.block_end_string = cfg.block_end_string
+        self.variable_start_string = cfg.variable_start_string
+        self.variable_end_string = cfg.variable_end_string
+        self.comment_start_string = cfg.comment_start_string
+        self.comment_end_string = cfg.comment_end_string
+        self.line_statement_prefix = cfg.line_statement_prefix
+        self.line_comment_prefix = cfg.line_comment_prefix
+        self.trim_blocks = cfg.trim_blocks
+        self.lstrip_blocks = cfg.lstrip_blocks
+        self.newline_sequence = cfg.newline_sequence
+        self.keep_trailing_newline = cfg.keep_trailing_newline
+        for ext in cfg.extensions or []:
+            self.add_extension(ext)
+
     def set_undefined(self, value: undefined_.UndefinedStr | type[jinja2.Undefined]) -> None:
         """Set the undefined behaviour for the environment.
 
@@ -244,56 +236,6 @@ class Environment(jinja2.Environment):
         """
         new = undefined_.UNDEFINED_BEHAVIOR[value] if isinstance(value, str) else value
         self.undefined = new
-
-    def load_jinja_file(
-        self,
-        path: str | os.PathLike[str],
-        scope_prefix: str = "",
-        load_filters: bool = True,
-        load_tests: bool = True,
-        load_functions: bool = True,
-        load_config: bool = True,
-        load_loader: bool = True,
-    ) -> None:
-        """Load the content of a JinjaFile and add it to the environment.
-
-        This function reads a JinjaFile and adds its filters, tests,
-        functions, and configuration to the current environment.
-
-        Args:
-            path: The path to the JinjaFile
-            scope_prefix: Optional prefix to add to all tests / filters / functions
-            load_filters: Whether to load filters from the JinjaFile
-            load_tests: Whether to load tests from the JinjaFile
-            load_functions: Whether to load functions from the JinjaFile
-            load_config: Whether to load the environment config from the JinjaFile
-            load_loader: Whether to load the Loader from the JinjaFile
-        """
-        file = jinjafile.JinjaFile(path)
-        filters, tests, functions = jinjafile.load_items(path)
-        if load_filters:
-            self.filters.update({f"{scope_prefix}{k}": v for k, v in filters.items()})
-        if load_tests:
-            self.tests.update({f"{scope_prefix}{k}": v for k, v in tests.items()})
-        if load_functions:
-            self.globals.update({f"{scope_prefix}{k}": v for k, v in functions.items()})
-        if load_config:
-            self.block_start_string = file.envconfig.block_start_string
-            self.block_end_string = file.envconfig.block_end_string
-            self.variable_start_string = file.envconfig.variable_start_string
-            self.variable_end_string = file.envconfig.variable_end_string
-            self.comment_start_string = file.envconfig.comment_start_string
-            self.comment_end_string = file.envconfig.comment_end_string
-            self.line_statement_prefix = file.envconfig.line_statement_prefix
-            self.line_comment_prefix = file.envconfig.line_comment_prefix
-            self.trim_blocks = file.envconfig.trim_blocks
-            self.lstrip_blocks = file.envconfig.lstrip_blocks
-            self.newline_sequence = file.envconfig.newline_sequence
-            self.keep_trailing_newline = file.envconfig.keep_trailing_newline
-            for ext in file.envconfig.extensions or []:
-                self.add_extension(ext)
-        if load_loader and (loader := file.loader):
-            self._add_loader(loader)
 
     @overload
     def compile(
@@ -382,90 +324,6 @@ class Environment(jinja2.Environment):
         self.linked_to = env
         self.overlayed = True
 
-    def add_template(self, file: str | os.PathLike[str]) -> None:
-        """Add a new template during runtime.
-
-        This function adds a new template to the environment during
-        runtime by creating a new DictLoader and injecting it into the
-        existing loaders. This allows rendering templates that were not
-        defined when the environment was initialized.
-
-        !!! info "Use case"
-            This function is particularly useful for situations where a
-            template needs to be rendered dynamically, such as when
-            rendering templates within other templates.
-
-        Args:
-            file: File to add as a template
-        """
-        # we keep track of already added extra files to not add things multiple times.
-        file = str(file)
-        if file in self._extra_files:
-            return
-        self._extra_files.add(file)
-        content = envglobals.load_file_cached(file)
-        new_loader = loaders.DictLoader({file: content})
-        self._add_loader(new_loader)
-
-    def add_template_path(self, *path: str | os.PathLike[str]) -> None:
-        """Add a new template path during runtime.
-
-        This function adds a new template path to the environment
-        during runtime by appending a new FileSystemLoader to the
-        existing loaders. This allows the environment to find templates
-        in additional locations.
-
-        Args:
-            path: Template search path(s) to add
-        """
-        for p in path:
-            if p in self._extra_paths:
-                return
-            self._extra_paths.add(str(p))
-            new_loader = loaders.FileSystemLoader(p)
-            self._add_loader(new_loader)
-
-    def _add_loader(
-        self,
-        new_loader: jinja2.BaseLoader | dict[str, str] | str | os.PathLike[str],
-    ) -> None:
-        """Add a new loader to the current environment."""
-        match new_loader:
-            case dict():
-                new_loader = loaders.DictLoader(new_loader)
-            case str() | os.PathLike():
-                new_loader = loaders.FileSystemLoader(new_loader)
-        match self.loader:
-            case jinja2.ChoiceLoader():
-                self.loader.loaders = [new_loader, *self.loader.loaders]
-            case None:
-                self.loader = new_loader
-            case _:
-                self.loader = loaders.ChoiceLoader(loaders=[new_loader, self.loader])
-
-    def render_condition(
-        self,
-        string: str,
-        variables: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ) -> bool:
-        """Render a template condition.
-
-        This function renders a template string and evaluates its
-        result as a boolean. It returns True if the result is truthy
-        (not None, False, or an empty string), otherwise False.
-
-        Args:
-            string: String to evaluate for True-ishness
-            variables: Extra variables for the rendering
-            kwargs: Further extra variables for rendering
-
-        Returns:
-            True if the rendered string is truthy, False otherwise.
-        """
-        result = self.render_string(string=string, variables=variables, **kwargs)
-        return result not in ["None", "False", ""]
-
     async def render_condition_async(
         self,
         string: str,
@@ -514,12 +372,12 @@ class Environment(jinja2.Environment):
             template = cls.from_code(self, self.compile(string), self.globals, None)
         except TemplateSyntaxError as e:
             msg = f"Error when evaluating \n{string}\n (extra globals: {variables})"
-            raise SyntaxError(msg) from e
+            raise engine.TemplateSyntaxError(msg) from e
         try:
             return template.render(**variables)
         except Exception as e:
             msg = f"Error when rendering \n{string}\n (extra globals: {variables})"
-            raise RuntimeError(msg) from e
+            raise engine.TemplateRenderError(msg) from e
 
     async def render_string_async(
         self,
@@ -546,39 +404,12 @@ class Environment(jinja2.Environment):
             template = cls.from_code(self, self.compile(string), self.globals, None)
         except TemplateSyntaxError as e:
             msg = f"Error when evaluating \n{string}\n (extra globals: {variables})"
-            raise SyntaxError(msg) from e
+            raise engine.TemplateSyntaxError(msg) from e
         try:
             return await template.render_async(**variables)
         except Exception as e:
             msg = f"Error when rendering \n{string}\n (extra globals: {variables})"
-            raise RuntimeError(msg) from e
-
-    def render_file(
-        self,
-        file: str | os.PathLike[str],
-        variables: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ) -> str:
-        """Helper to directly render a template from filesystem.
-
-        This function renders a template file directly from the
-        filesystem using the current environment's configuration and
-        globals.
-
-        !!! info
-            The file content is cached, which is generally acceptable
-            for common use cases.
-
-        Args:
-            file: Template file to load
-            variables: Extra variables for the rendering
-            kwargs: Further extra variables for rendering
-
-        Returns:
-            The rendered string.
-        """
-        content = envglobals.load_file_cached(str(file))
-        return self.render_string(content, variables, **kwargs)
+            raise engine.TemplateRenderError(msg) from e
 
     async def render_file_async(
         self,
@@ -691,100 +522,6 @@ class Environment(jinja2.Environment):
             [n async for n in block_render_func(ctx)]  # type: ignore
         )
         # return self.concat(block_render_func(ctx))
-
-    @contextlib.contextmanager
-    def with_globals(self, **kwargs: Any) -> Generator[None]:
-        """Context manager to temporarily set globals for the environment.
-
-        This context manager allows temporarily overriding the environment's
-        globals with the provided values. The previous values are restored on exit,
-        also when the block raises.
-
-        The globals dict is changed in place (templates loaded before see the
-        values too), so this is not safe while other threads or tasks render with
-        the same environment: pass render variables there instead.
-
-        Args:
-            kwargs: Globals to set
-        """
-        missing = object()
-        previous = {k: self.globals.get(k, missing) for k in kwargs}
-        self.globals.update(kwargs)
-        try:
-            yield
-        finally:
-            for k, v in previous.items():
-                if v is missing:
-                    self.globals.pop(k, None)
-                else:
-                    self.globals[k] = v
-
-    def setup_loader(
-        self,
-        dir_paths: list[str] | None = None,
-        module_paths: list[str] | None = None,
-        static: dict[str, str] | None = None,
-        fsspec_paths: bool = True,
-    ) -> None:
-        """Set the loader for the environment.
-
-        This function sets the loader for the environment based on
-        the provided parameters. It uses the ``jinjarope.get_loader``
-        function to create a suitable loader.
-
-        Args:
-            dir_paths: List of directory paths to search for templates
-            module_paths: List of module paths to search for templates
-            static: Dictionary of static files to include in the loader
-            fsspec_paths: Whether to add a loader taking any local path or fsspec URL
-                as template name. With it, templates can include any file or URL,
-                outside of ``dir_paths``: only use it for trusted templates.
-        """
-        self.loader = jinjarope.get_loader(
-            dir_paths=dir_paths,
-            module_paths=module_paths,
-            static=static,
-            fsspec_paths=fsspec_paths,
-        )
-
-    def evaluate(
-        self,
-        code: str,
-        context: dict[str, Any] | None = None,
-    ) -> Any:
-        """Evaluate python code and return the caught stdout + return value of last line.
-
-        The code runs in a copy of the environment's globals (updated with
-        ``context``), so its assignments don't leak into the environment.
-        Output of ``print()`` calls is captured without swapping ``sys.stdout``
-        (writes to ``sys.stdout`` itself are not captured).
-
-        Args:
-            code: The code to execute
-            context: Additional globals for the execution
-
-        Returns:
-            The value of the last line if nothing was printed (``""`` for ``None``),
-            otherwise the printed output followed by that value.
-        """
-        now = time.time()
-        logger.debug("Evaluating code:\n%s", code)
-        tree = ast.parse(code)
-        last = tree.body[-1] if tree.body else None
-        eval_expr = ast.Expression(last.value) if isinstance(last, ast.Expr) else None
-        exec_expr = ast.Module(body=tree.body[:-1] if eval_expr else tree.body, type_ignores=[])
-        buffer = io.StringIO()
-
-        def _print(*args: Any, file: Any = None, **kwargs: Any) -> None:
-            print(*args, file=buffer if file is None else file, **kwargs)
-
-        namespace: dict[str, Any] = {**self.globals, **(context or {}), "print": _print}
-        exec(compile(exec_expr, "file", "exec"), namespace)
-        val = eval(compile(eval_expr, "file", "eval"), namespace) if eval_expr else None
-        logger.debug("Code evaluation took %s seconds.", time.time() - now)
-        if output := buffer.getvalue():
-            return output if val is None else f"{output}{val}"
-        return "" if val is None else val
 
     def get_config(self) -> envconfig.EnvConfig:
         """All environment settings as a dict (not included: undefined and loaders).

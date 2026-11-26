@@ -49,6 +49,11 @@ class EnvConfig:
         default_factory=list,
     )
     """A list of jinja2 extentions."""
+    engine: str | None = None
+    """The template engine backend (`jinja2`, `minijinja`; `None`: the default, Jinja2).
+
+    See `jinjarope.engine`.
+    """
 
     def __repr__(self) -> str:
         return utils.get_repr(self, **self.as_dict())

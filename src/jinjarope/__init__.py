@@ -1,5 +1,14 @@
 from importlib.metadata import version as _metadata_version
 
+from .engine import (
+    TemplateEngine,
+    TemplateError,
+    TemplateNotFoundError,
+    TemplateRenderError,
+    TemplateSyntaxError,
+    create_environment,
+    get_engine_class,
+)
 from .environment import BlockNotFoundError, Environment
 from .envconfig import EnvConfig
 from .loaders import (
@@ -54,7 +63,14 @@ __all__ = [
     "PackageLoader",
     "PrefixLoader",
     "RewriteLoader",
+    "TemplateEngine",
+    "TemplateError",
     "TemplateFileLoader",
+    "TemplateNotFoundError",
+    "TemplateRenderError",
+    "TemplateSyntaxError",
+    "create_environment",
+    "get_engine_class",
     "get_loader",
     "get_loader_cls_by_id",
     "get_loader_from_json",
