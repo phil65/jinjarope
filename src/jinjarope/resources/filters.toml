@@ -766,6 +766,16 @@ template = """
 {{ "3" | hasattr("removeprefix") }}
 """
 
+[filters.getattr]
+fn = "jinjarope.inspectfilters.get_attribute"
+group = "inspect"
+icon = "mdi:code-braces"
+
+[filters.getattr.examples.basic]
+template = """
+{{ "jinjarope" | getattr("__class__") }}
+"""
+
 [filters.partial]
 fn = "jinjarope.utils.partial"
 group = "misc"

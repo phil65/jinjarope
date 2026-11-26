@@ -88,6 +88,7 @@ JINJA2_COMPAT_FILTERS: dict[str, Callable[..., Any]] = {
         # different arguments in minijinja
         "batch",
         "filesizeformat",
+        "indent",  # Jinja2: width can be a string, `first` / `blank` keywords
         "truncate",
         "wordwrap",
     )
@@ -96,7 +97,10 @@ JINJA2_COMPAT_TESTS: dict[str, Callable[..., bool]] = {
     "callable": jinja2.defaults.DEFAULT_TESTS["callable"],
 }
 JINJA2_COMPAT_GLOBALS: dict[str, Any] = {
-    name: jinja2.defaults.DEFAULT_NAMESPACE[name] for name in ("lipsum", "cycler", "joiner")
+    # `dict` is a minijinja function too, but as a value (`x is instance(dict)`) it has
+    # to be the Python type
+    name: jinja2.defaults.DEFAULT_NAMESPACE[name]
+    for name in ("lipsum", "cycler", "joiner", "dict")
 }
 
 # The name minijinja gives template strings (Jinja2: `None`).

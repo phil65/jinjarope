@@ -211,3 +211,14 @@ def test_minijinja_extract_block():
     assert extract_block(source, "b") == "2"
     assert extract_block(source, "c") == "4"
     assert extract_block(source, "d") is None
+
+
+def test_getattr_filter(env: jinjarope.TemplateEngine):
+    assert env.render_string('{{ cls | getattr("__name__") }}', cls=int) == "int"
+    assert env.render_string('{{ 1 | getattr("missing", "fallback") }}') == "fallback"
+
+
+def test_jinja2_compatible_builtins(env: jinjarope.TemplateEngine):
+    assert env.render_string('{{ "a\nb" | indent(width="> ", first=True) }}') == "> a\n> b"
+    assert env.render_string("{{ {'a': 1} is instance(dict) }}") == "True"
+    assert env.render_string("{{ dict(a=1)['a'] }}") == "1"

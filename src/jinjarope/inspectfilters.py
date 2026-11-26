@@ -229,6 +229,20 @@ def get_doc(
     return mdfilters.md_escape(doc) if doc and escape else doc
 
 
+def get_attribute(obj: Any, name: str, *default: Any) -> Any:
+    """Return an attribute of an object (Python's `getattr`, as a filter).
+
+    Also reaches attributes starting with an underscore, which minijinja hides from
+    `obj.attr` (`{{ cls | getattr("__name__") }}` works with both engines).
+
+    Args:
+        obj: The object
+        name: The attribute name
+        default: Value to return if the attribute doesn't exist (else AttributeError)
+    """
+    return getattr(obj, name, *default)
+
+
 def get_argspec(obj: Any, remove_self: bool = True) -> inspect.FullArgSpec:
     """Return a cleaned-up FullArgSpec for given callable.
 
