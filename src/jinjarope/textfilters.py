@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import annotationlib
 import datetime as dt
 import functools
 import inspect
@@ -121,6 +120,28 @@ def extract_body(src: str) -> str:
     return "".join(src_lines)
 
 
+def _get_signature(
+    fn: Callable[..., Any], *, follow_wrapped: bool, eval_str: bool
+) -> inspect.Signature:
+    """Signature with evaluated annotations, or their source strings.
+
+    Annotations are evaluated lazily (PEP 649). Without `eval_str`, or when they can't be
+    evaluated (names imported only under `TYPE_CHECKING`), use their source text.
+    """
+    if eval_str:
+        try:
+            return inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=True)
+        except TypeError, NameError:
+            pass
+        try:  # string annotations stay strings, the rest is evaluated
+            return inspect.signature(fn, follow_wrapped=follow_wrapped)
+        except TypeError, NameError:
+            pass
+    return inspect.signature(
+        fn, follow_wrapped=follow_wrapped, annotation_format=annotationlib.Format.STRING
+    )
+
+
 @functools.cache
 def format_signature(
     fn: Callable[..., Any],
@@ -136,13 +157,7 @@ def format_signature(
         eval_str: Un-stringize annotations using eval
         remove_jinja_arg: If true, remove the first argument for pass_xyz decorated fns.
     """
-    if eval_str:
-        try:
-            sig = inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=True)
-        except TypeError, NameError:
-            sig = inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=False)
-    else:
-        sig = inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=False)
+    sig = _get_signature(fn, follow_wrapped=follow_wrapped, eval_str=eval_str)
     if remove_jinja_arg and hasattr(fn, "jinja_pass_arg"):
         # for @pass_xyz decorated functions
         params = dict(sig._parameters)  # type: ignore[attr-defined]
@@ -168,7 +183,7 @@ def format_filter_signature(
         follow_wrapped: Whether to unwrap the callable
         eval_str: Un-stringize annotations using eval
     """
-    sig = inspect.signature(fn, follow_wrapped=follow_wrapped, eval_str=eval_str)
+    sig = _get_signature(fn, follow_wrapped=follow_wrapped, eval_str=eval_str)
     params = dict(sig._parameters)  # type: ignore[attr-defined]
     if hasattr(fn, "jinja_pass_arg"):
         # for @pass_xyz decorated functions

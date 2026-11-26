@@ -65,8 +65,8 @@ don't run it unless asked).
 
 ## Conventions
 
-- Python >= 3.13, `from __future__ import annotations`, Google-style docstrings, line
-  length 100, ruff preview formatting. ruff and ty are pinned in the `lint` group.
+- Python >= 3.14, no `from __future__ import annotations` (PEP 649; banned via ruff TID251),
+  Google-style docstrings, line length 100, ruff preview formatting. ruff and ty are pinned in the `lint` group.
 - Use targeted `# ty: ignore[rule]` only for real checker limitations (jinja2/fsspec stubs).
 - Every TOML item should have at least one example: the docs build renders every example
   (`docs/filters.jinja`), so a broken example breaks the docs build.

@@ -1,7 +1,5 @@
 """Jinja2 template tag extensions."""
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from jinja2 import nodes

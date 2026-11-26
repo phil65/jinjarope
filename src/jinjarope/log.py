@@ -1,7 +1,5 @@
 """Logging configuration for jinjarope."""
 
-from __future__ import annotations
-
 import logging
 
 

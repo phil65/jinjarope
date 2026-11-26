@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import builtins
 import datetime as dt
 import functools

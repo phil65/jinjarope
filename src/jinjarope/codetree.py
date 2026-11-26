@@ -5,8 +5,6 @@ a tree-like visualization of their structure, including classes, methods,
 and functions with their decorators.
 """
 
-from __future__ import annotations
-
 import ast
 from dataclasses import dataclass
 from enum import Enum, auto

@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import annotationlib
 from collections.abc import Callable, Iterator
 import contextlib
 import functools
@@ -298,7 +297,10 @@ def get_signature(obj: Callable[..., Any]) -> inspect.Signature:
     Args:
         obj: Callable to get a signature for.
     """
-    return inspect.signature(obj)
+    try:
+        return inspect.signature(obj)
+    except NameError:  # annotation names imported only under TYPE_CHECKING (PEP 649)
+        return inspect.signature(obj, annotation_format=annotationlib.Format.STRING)
 
 
 @functools.cache

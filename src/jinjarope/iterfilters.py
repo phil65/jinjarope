@@ -1,12 +1,10 @@
-from __future__ import annotations
-
-from collections.abc import Callable, Generator, Iterable, Mapping
+from collections.abc import Callable, Generator, Iterable, Iterator, Mapping
 import itertools
 import operator
 from typing import Any
 
 
-def pairwise[T](items: Iterable[T]) -> itertools.pairwise[tuple[T, T]]:
+def pairwise[T](items: Iterable[T]) -> Iterator[tuple[T, T]]:
     """Return an iterator of overlapping pairs taken from the input iterator.
 
     s -> (s0,s1), (s1,s2), (s2, s3), ...
@@ -37,7 +35,7 @@ def chain[T](*iterables: Iterable[T]) -> itertools.chain[T]:
 def product(
     *iterables: Iterable[Any],
     repeat: int = 1,
-) -> itertools.product[tuple[Any, ...]]:
+) -> Iterator[tuple[Any, ...]]:
     """Cartesian product of input iterables.
 
     Roughly equivalent to nested for-loops in a generator expression.
@@ -101,7 +99,7 @@ def zip_longest(*iterables: Iterable[Any], fillvalue: Any = None) -> Iterable[An
     return itertools.zip_longest(*iterables, fillvalue)
 
 
-def islice[T](iterable: Iterable[T], *args: int | None) -> itertools.islice[T]:
+def islice[T](iterable: Iterable[T], *args: int | None) -> Iterator[T]:
     """Make an iterator that returns selected elements from the iterable.
 
     If start is non-zero, then elements from the iterable are skipped until start
@@ -133,7 +131,7 @@ def islice[T](iterable: Iterable[T], *args: int | None) -> itertools.islice[T]:
     return itertools.islice(iterable, *args)
 
 
-def do_zip[T](*items: Iterable[T]) -> zip[tuple[T, ...]]:
+def do_zip[T](*items: Iterable[T]) -> Iterator[tuple[T, ...]]:
     """Zip iterables into a single one.
 
     Args:
