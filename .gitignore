@@ -5,6 +5,7 @@ __pycache__/
 *.sublime-workspace
 # Unit test / coverage reports
 .coverage
+coverage.xml
 .cache
 .hatch
 .pytest_cache/
@@ -29,6 +30,7 @@ junit.xml
 .DS_Store
 # uv
 uv.lock
-
+# DiskCache cache file
+./model_cache
 # Stakpak session files
 .stakpak/session*

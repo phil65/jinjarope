@@ -1,3 +1,5 @@
+"""Project tasks."""
+
 from __future__ import annotations
 
 from typing import Literal
@@ -37,13 +39,12 @@ def update(ctx):
     """Update all environment packages using pip directly."""
     ctx.run("uv lock --upgrade")
     ctx.run("uv sync --all-extras")
-    ctx.run("uv pip install google-generativeai")
 
 
 @duty(capture=False)
 def lint(ctx):
     """Lint the code and fix issues if possible."""
-    ctx.run("uv run ruff check --fix .")
+    ctx.run("uv run ruff check --fix --unsafe-fixes .")
     ctx.run("uv run ruff format .")
     ctx.run("uv run ty check")
 
@@ -57,13 +58,18 @@ def lint_check(ctx):
 
 
 @duty(capture=False)
+def changelog(ctx, *args: str):
+    """Write the whole release history to CHANGELOG.md (git-cliff, see cliff.toml)."""
+    args_str = " " + " ".join(args) if args else ""
+    ctx.run(f"uvx git-cliff --output CHANGELOG.md{args_str}")
+
+
+@duty(capture=False)
 def version(
     ctx,
-    bump_type: Literal[
-        "major", "minor", "patch", "stable", "alpha", "beta", "rc", "post", "dev"
-    ] = "patch",
+    *bump_type: Literal["major", "minor", "patch", "stable", "alpha", "beta", "rc"],
 ):
-    """Release a new version with git operations. (major|minor|patch|stable|alpha|beta|rc|post|dev)."""  # noqa: E501
+    """Release a new version with git operations. (major|minor|patch|stable|alpha|beta|rc)."""
     # Check for uncommitted changes
     result = ctx.run("git status --porcelain", capture=True)
     if result.strip():
@@ -73,7 +79,8 @@ def version(
     # Read current version
     old_version = ctx.run("uv version --short", capture=True).strip()
     print(f"Current version: {old_version}")
-    ctx.run(f"uv version --bump {bump_type}")
+    bump_str = " ".join(f"--bump {i}" for i in bump_type)
+    ctx.run(f"uv version {bump_str}")
     new_version = ctx.run("uv version --short", capture=True).strip()
     print(f"New version: {new_version}")
     ctx.run("git add pyproject.toml")

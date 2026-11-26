@@ -95,3 +95,10 @@ markdown_extensions:
   #     alternate_style: true
   # - admonition
   # - pymdownx.details
+
+extra:
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/phil65
+  - icon: fontawesome/brands/python
+    link: https://pypi.org/project/jinjarope/
