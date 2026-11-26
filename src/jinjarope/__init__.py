@@ -27,7 +27,7 @@ from .configloaders import NestedDictLoader, TemplateFileLoader
 from .fsspecloaders import FsSpecFileSystemLoader, FsSpecProtocolPathLoader
 from .loaderregistry import LoaderRegistry
 from .jinjafile import JinjaFile, JinjaItem
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from jinja2 import BaseLoader
@@ -44,6 +44,16 @@ def get_loader_cls_by_id(loader_id: str) -> type[BaseLoader]:
     return loaders[loader_id]  # type: ignore[no-any-return]
 
 
+def __getattr__(name: str) -> Any:
+    # optional backend: importing jinjarope must not need minijinja
+    if name == "MiniJinjaEnvironment":
+        from .minijinjaenv import MiniJinjaEnvironment
+
+        return MiniJinjaEnvironment
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
+
+
 __version__ = _metadata_version("jinjarope")
 
 __all__ = [
@@ -58,6 +68,7 @@ __all__ = [
     "FunctionLoader",
     "JinjaFile",
     "JinjaItem",
+    "MiniJinjaEnvironment",
     "ModuleLoader",
     "NestedDictLoader",
     "PackageLoader",

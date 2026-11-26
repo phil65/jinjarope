@@ -61,6 +61,7 @@ httpx = ["httpx2>=2.16"]  # kept for compatibility, installs httpx2
 httpx2 = ["httpx2>=2.16"]
 icons = ["pycons>=1.1.0"]
 llm = ["agentpool"]
+minijinja = ["minijinja>=3.1.0"]
 yaml = ["yamling"]
 
 [dependency-groups]

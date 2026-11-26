@@ -176,6 +176,10 @@ def get_engine_class(name: EngineName | str | None = None) -> type[TemplateEngin
             from jinjarope.environment import Environment
 
             return Environment
+        case "minijinja":
+            from jinjarope.minijinjaenv import MiniJinjaEnvironment
+
+            return MiniJinjaEnvironment
         case _:
             msg = f"Unknown template engine {name!r} (one of {', '.join(ENGINES)})"
             raise ValueError(msg)
