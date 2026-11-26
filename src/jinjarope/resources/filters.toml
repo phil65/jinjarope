@@ -1051,8 +1051,7 @@ icon = "mdi:set-split"
 
 [filters.iter_union_types.examples.basic]
 template = """
-{%- set typing = "typing" | import_module -%}
-{%- for typ in typing.Union[str, int, None] | iter_union_types -%}
+{%- for typ in "str | int | None" | evaluate | iter_union_types -%}
 {{ typ }}
 {% endfor -%}
 """
