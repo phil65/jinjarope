@@ -127,7 +127,8 @@ class StateContext:
     """What a Jinja2 `pass_context` callable gets under minijinja.
 
     A subset of `jinja2.runtime.Context`: `name`, `environment`, `get()`, `[]`, `in`.
-    Lookups see template variables, render variables and globals.
+    Lookups see template variables, render variables and globals. minijinja's lookup
+    returns `None` for undefined names, so a variable set to `None` counts as missing.
     """
 
     __slots__ = ("_state", "environment")
@@ -379,8 +380,7 @@ class MiniJinjaEnvironment(envbase.EnvironmentBase):
     @loader.setter
     def loader(self, value: jinja2.BaseLoader | None) -> None:
         self._loader = value
-        # minijinja caches loaded templates: a new loader may resolve names differently
-        self._native.clear_templates()
+        self._loader_changed()
 
     @property
     def undefined_behavior(self) -> MiniJinjaUndefined:
@@ -467,7 +467,11 @@ class MiniJinjaEnvironment(envbase.EnvironmentBase):
         with self._lock:
             for current, registry in self._registries:
                 registry.sync(current)
-            return self._registries[2][1].callables
+            return dict(self._registries[2][1].callables)
+
+    def _loader_changed(self) -> None:
+        # minijinja caches loaded templates: a changed loader may resolve names differently
+        self._native.clear_templates()
 
     def render_string(
         self,
@@ -525,19 +529,30 @@ class MiniJinjaEnvironment(envbase.EnvironmentBase):
         """
         variables = (variables or {}) | kwargs
         context = self._sync() | variables
-        if block_name:
+        try:
+            if not block_name:
+                return self._native.render_template(template_name, **context)
             source = self.get_source(template_name)
-            block = extract_block(source, block_name, self._native.block_start_string)
+            native = self._native
+            block = extract_block(
+                source,
+                block_name,
+                native.block_start_string,
+                native.block_end_string,
+                native.comment_start_string,
+                native.comment_end_string,
+            )
             if block is None:
                 from jinjarope.environment import BlockNotFoundError
 
                 raise BlockNotFoundError(block_name, template_name)
-            return self._native.render_str(block, template_name, **context)
-        try:
-            return self._native.render_template(template_name, **context)
+            return native.render_str(block, template_name, **context)
         except minijinja.TemplateError as e:
-            if e.kind == "TemplateNotFound" and e.name is None:
-                raise engine.TemplateNotFoundError(template_name, str(e)) from e
+            if e.kind == "TemplateNotFound":
+                # the template itself or one it includes / extends / imports
+                names = re.findall(r"""template ['"](.+?)['"]""", e.message)
+                name = names[0] if names else template_name
+                raise engine.TemplateNotFoundError(name, str(e)) from e
             raise
 
     def get_source(self, template_name: str) -> str:
@@ -560,26 +575,51 @@ class MiniJinjaEnvironment(envbase.EnvironmentBase):
         )
 
 
-def extract_block(source: str, block_name: str, block_start: str = "{%") -> str | None:
+def extract_block(
+    source: str,
+    block_name: str,
+    block_start: str = "{%",
+    block_end: str = "%}",
+    comment_start: str = "{#",
+    comment_end: str = "#}",
+) -> str | None:
     """Return the source inside `{% block <block_name> %}` ... `{% endblock %}`.
 
-    Nested blocks count (the matching `endblock` is found). `None` if there is no such
-    block. minijinja's Python API can't render a single block, so `render_template`
-    renders this source instead.
+    Nested blocks count (the matching `endblock` is found), tags inside comments and
+    `raw` blocks don't. Whitespace control of the block's own tags (`-%}` / `{%-`)
+    gets applied to the returned source. `None` if there is no such block.
+
+    minijinja's Python API can't render a single block, so `render_template` renders
+    this source instead: definitions outside the block (`set`, `import`, macros)
+    are not part of it.
     """
-    start = re.escape(block_start)
-    tag = re.compile(rf"{start}[-+]?\s*(block\s+(\w+)|endblock)\b[^%]*?[-+]?%}}")
+    bs, be = re.escape(block_start), re.escape(block_end)
+    cs, ce = re.escape(comment_start), re.escape(comment_end)
+    # Blank out comments and raw blocks (same length, so positions stay valid).
+    hidden = re.compile(
+        rf"{cs}.*?{ce}|{bs}[-+]?\s*raw\s*[-+]?{be}.*?{bs}[-+]?\s*endraw\s*[-+]?{be}", re.S
+    )
+    scan = hidden.sub(lambda m: " " * len(m.group()), source)
+    tag = re.compile(
+        rf"{bs}(?P<lws>[-+]?)\s*(?:block\s+(?P<name>\w+)|endblock)\b.*?(?P<rws>[-+]?){be}", re.S
+    )
     depth = 0
     begin: int | None = None
-    for match in tag.finditer(source):
-        if match.group(2) is not None:
-            if begin is None and match.group(2) == block_name:
-                begin = match.end()
-                depth = 0
+    strip_start = False
+    for match in tag.finditer(scan):
+        if match.group("name") is not None:
+            if begin is None and match.group("name") == block_name:
+                begin, depth = match.end(), 0
+                strip_start = match.group("rws") == "-"
             elif begin is not None:
                 depth += 1
         elif begin is not None:
             if depth == 0:
-                return source[begin : match.start()]
+                content = source[begin : match.start()]
+                if strip_start:
+                    content = content.lstrip()
+                if match.group("lws") == "-":
+                    content = content.rstrip()
+                return content
             depth -= 1
     return None

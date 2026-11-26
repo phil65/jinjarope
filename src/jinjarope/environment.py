@@ -228,6 +228,11 @@ class Environment(envbase.EnvironmentBase, jinja2.Environment):
         for ext in cfg.extensions or []:
             self.add_extension(ext)
 
+    def _loader_changed(self) -> None:
+        # Jinja2 caches templates per loader object: drop them after an in-place change
+        if self.cache is not None:
+            self.cache.clear()
+
     def set_undefined(self, value: undefined_.UndefinedStr | type[jinja2.Undefined]) -> None:
         """Set the undefined behaviour for the environment.
 

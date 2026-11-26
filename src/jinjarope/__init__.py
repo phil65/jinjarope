@@ -68,7 +68,6 @@ __all__ = [
     "FunctionLoader",
     "JinjaFile",
     "JinjaItem",
-    "MiniJinjaEnvironment",
     "ModuleLoader",
     "NestedDictLoader",
     "PackageLoader",

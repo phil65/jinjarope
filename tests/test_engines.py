@@ -222,3 +222,33 @@ def test_jinja2_compatible_builtins(env: jinjarope.TemplateEngine):
     assert env.render_string('{{ "a\nb" | indent(width="> ", first=True) }}') == "> a\n> b"
     assert env.render_string("{{ {'a': 1} is instance(dict) }}") == "True"
     assert env.render_string("{{ dict(a=1)['a'] }}") == "1"
+
+
+def test_missing_included_template(env: jinjarope.TemplateEngine):
+    env.loader = jinjarope.DictLoader({"page.md": "{% include 'missing.md' %}"})
+    with pytest.raises(LookupError):
+        env.render_template("page.md")
+
+
+def test_added_loader_drops_cached_templates(env: jinjarope.TemplateEngine):
+    env.loader = jinjarope.ChoiceLoader([jinjarope.DictLoader({"a": "old"})])
+    assert env.render_template("a") == "old"
+    env._add_loader({"a": "new"})  # ty: ignore[unresolved-attribute]
+    assert env.render_template("a") == "new"
+
+
+def test_render_block_whitespace_comments_and_delimiters(engine_name: str):
+    env = jinjarope.create_environment(engine_name)
+    env.loader = jinjarope.DictLoader({
+        "a": "{# {% block b %}old{% endblock %} #}{%- block b -%}\n new \n{%- endblock -%}",
+    })
+    assert env.render_template("a", block_name="b") == "new"
+    env = jinjarope.create_environment(engine_name, block_start_string="[%", block_end_string="%]")
+    env.loader = jinjarope.DictLoader({"a": "x[% block b %]hi[% endblock %]y"})
+    assert env.render_template("a", block_name="b") == "hi"
+
+
+def test_constructor_syntax_settings_are_kept(engine_name: str):
+    """The default JinjaFiles have no config section: they must not reset the settings."""
+    env = jinjarope.create_environment(engine_name, trim_blocks=False)
+    assert env.render_string("{% if true %}\nx{% endif %}") == "\nx"

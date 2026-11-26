@@ -67,6 +67,9 @@ class EnvironmentBase:
     def __contains__(self, template: str | os.PathLike[str]) -> bool:
         raise NotImplementedError
 
+    def _loader_changed(self) -> None:
+        """Called after the loader got changed in place (backends caching templates)."""
+
     def _apply_envconfig(self, cfg: envconfig.EnvConfig) -> None:
         """Apply the syntax / whitespace settings (and extensions) of a JinjaFile."""
         raise NotImplementedError
@@ -125,7 +128,8 @@ class EnvironmentBase:
             load_filters: Whether to load filters from the JinjaFile
             load_tests: Whether to load tests from the JinjaFile
             load_functions: Whether to load functions from the JinjaFile
-            load_config: Whether to load the environment config from the JinjaFile
+            load_config: Whether to load the environment config from the JinjaFile (if
+                it has a `config` section)
             load_loader: Whether to load the Loader from the JinjaFile
         """
         file = jinjafile.JinjaFile(path)
@@ -136,7 +140,7 @@ class EnvironmentBase:
             self.tests.update({f"{scope_prefix}{k}": v for k, v in tests.items()})
         if load_functions:
             self.globals.update({f"{scope_prefix}{k}": v for k, v in functions.items()})
-        if load_config:
+        if load_config and "config" in file:
             self._apply_envconfig(file.envconfig)
         if load_loader and (loader := file.loader):
             self._add_loader(loader)
@@ -197,6 +201,7 @@ class EnvironmentBase:
         match self.loader:
             case jinja2.ChoiceLoader():
                 self.loader.loaders = [new_loader, *self.loader.loaders]
+                self._loader_changed()
             case None:
                 self.loader = new_loader
             case _:
