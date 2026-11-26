@@ -29,7 +29,7 @@ These TOML files can be used to define an environment in a declarative way and c
 **JinjaRope** itself contains separate definition files for the **jinja2**-builtin filters / tests
 and the **JinjaRope** filters / tests. The **jinja2**-definition files are only used for documentation (that way the documentation contains all filters / tests, so no need to juggle between different docs), the **JinjaRope** definition files will also get loaded by the jinjarope environment.
 
-[JinjaFiles][jinjarope.JinjaFile] can get added to Environments easily via [jinjarope.Environment.load_jinja_file][].
+[JinjaFiles][jinjarope.JinjaFile] can get added to Environments easily via [jinjarope.Environment.load_jinja_file][jinjarope.envbase.EnvironmentBase.load_jinja_file].
 
 
 In the following part the different sections of the TOML file will get explained.

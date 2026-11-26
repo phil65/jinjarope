@@ -48,6 +48,8 @@ class Build:
         page += mk.MkTemplate("extensions.md")
         page = extending_nav.add_page("JinjaFiles", hide="toc")
         page += mk.MkTemplate("jinjafiles.md")
+        page = nav.add_page("Template engines", hide="toc")
+        page += mk.MkTemplate("engines.jinja")
         nav.add_doc(section_name="API", flatten_nav=True, recursive=True)
         page = nav.add_page("CLI", hide="nav")
         page += mk.MkTemplate("cli.jinja")

@@ -1,0 +1,85 @@
+{% raw %}
+jinjarope renders with [Jinja2](https://jinja.palletsprojects.com/) by default.
+`jinjarope.engine.TemplateEngine` describes what code needs from an environment, and two
+backends implement it:
+
+| Backend | Class | Install |
+| --- | --- | --- |
+| Jinja2 (default) | `jinjarope.Environment` | included |
+| [minijinja](https://github.com/mitsuhiko/minijinja) (Rust) | `jinjarope.MiniJinjaEnvironment` | `pip install "jinjarope[minijinja]"` |
+
+```python
+import jinjarope
+
+env = jinjarope.create_environment("minijinja", loader=jinjarope.DictLoader({"a.md": "{{ x }}"}))
+env.filters["shout"] = lambda value: f"{value}!"
+env.render_string("{{ 'hi' | shout }}")  # 'hi!'
+env.render_template("a.md", x=1)  # '1'
+```
+
+## The protocol
+
+- `filters`, `tests`, `globals`: plain dicts, changes apply to the next render.
+  Callables decorated with Jinja2's `pass_context` / `pass_environment` /
+  `pass_eval_context` work with both backends.
+- `loader`: a jinjarope / Jinja2 loader (minijinja gets an adapter).
+- `render_string()`, `render_template()` (also `block_name=`), `render_condition()`,
+  `render_file()`, `get_source()`, `with_globals()`, `set_undefined()`,
+  `load_jinja_file()`, `add_template()`, `add_template_path()`, `template in env`.
+- Errors: `render_string()` raises `TemplateSyntaxError` (a `SyntaxError`) or
+  `TemplateRenderError` (a `RuntimeError`, the original error is the `__cause__`).
+  Unknown templates raise a `LookupError` (`TemplateNotFoundError` with minijinja,
+  `jinja2.TemplateNotFound` with Jinja2).
+- `get_engine_class(name)` / `create_environment(name, **kwargs)`; `EnvConfig.engine`
+  names the backend of a config.
+
+## minijinja: differences
+
+minijinja implements Jinja2's syntax and most of its filters, but it is not Python.
+jinjarope bridges some differences; the rest are listed here.
+
+Bridged by jinjarope:
+
+- Jinja2 built-ins minijinja lacks or takes other arguments for come from Jinja2:
+  filters `batch`, `center`, `filesizeformat`, `forceescape`, `indent`, `random`,
+  `truncate`, `urlize`, `wordcount`, `wordwrap`, `xmlattr`, test `callable`, globals
+  `lipsum`, `cycler`, `joiner`, `dict` (the Python type, so `x is instance(dict)` works).
+- Callable globals are passed as render variables as well: minijinja turns registered
+  callables into functions, which can be called but are no values (`{{ len | name }}`
+  would get a string).
+- Lazy filters (JinjaFiles, plugin proxies) get inspected on their first call, not
+  when they are registered.
+- `render_template(block_name=...)` renders the source of the block (minijinja's
+  Python API can't render a single block); blocks inherited from a parent template
+  can't be rendered alone.
+- `{% break %}` / `{% continue %}` are built in (the `loopcontrols` extension is accepted).
+
+Not supported (`ValueError`): `enable_async=True`, Jinja2 extensions (i18n, ...),
+the `keep` undefined (`jinja2.DebugUndefined`) and custom Undefined classes,
+`newline_sequence` other than `"\n"`. Undefined behaviours map to minijinja's:
+`strict` -> strict, `silent` -> lenient, `lax` -> chainable.
+
+Differences in templates:
+
+| Jinja2 | minijinja | Workaround |
+| --- | --- | --- |
+| `obj._private`, `cls.__name__` | undefined: attributes starting with `_` are hidden | `obj \| getattr("__name__")` |
+| `mapping.key(...)` calls `mapping["key"]` | method call: `getattr` only | give the mapping a `__getattr__` |
+| `obj.name`: attribute first, then item | item first (objects with `__getitem__`), then attribute | `__getitem__` should raise `KeyError` / `IndexError` |
+| methods as values (`"".removesuffix`, `map(attribute="upper")`, `attr("upper")`) | undefined | call them |
+| all `str` methods | strings are minijinja strings: a subset (`upper`, `split`, `startswith`, ...), no `removesuffix` / `removeprefix` | filters (`removesuffix`, ...) |
+| `"%s" % x` | not supported | `"{}".format(x)`, `format` filter |
+| `{% do expr %}` | only call expressions (`{% do f() %}`) | |
+| namedtuples keep their attributes | converted to sequences (`p.a` undefined) | |
+| dict literals with non-string keys (`{int: "x"}`) | keys become strings | |
+| `1 / 0` raises `ZeroDivisionError` | minijinja error (`unable to calculate`) | |
+| `escape`: `&#34;` | `&quot;` | |
+| `pprint`: one line | indented | |
+| `urlencode`: spaces as `+` | `%20` | |
+| `"\a"` and other Python escapes in string literals | `\a` stays | |
+| `filters` / `tests` globals include Jinja2's built-ins | only jinjarope's (Python) ones | |
+| `parent_template` of `render_template` | ignored (names are not relative, as in Jinja2 by default) | |
+
+Template strings are parsed on every `render_string()` call (templates of the loader
+are cached per environment).
+{% endraw %}

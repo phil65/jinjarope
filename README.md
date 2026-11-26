@@ -48,7 +48,7 @@ pip install jinjarope
 
 Optional extras: `cli` (command line interface), `extras` (formatting, highlighting, humanize,
 natsort filters), `httpx2` (alias `httpx`), `icons` (icon filters), `llm` (`llm_complete`
-filter via agentpool), `yaml`.
+filter via agentpool), `minijinja` (minijinja backend), `yaml`.
 
 ```bash
 pip install "jinjarope[cli]"
@@ -70,6 +70,10 @@ print(env.render_string("{{ 'Hello World' | slugify }}"))  # hello_world
   filters / tests / functions, `render_string` / `render_file` / `render_template`,
   `with_globals()`, selectable undefined behavior (`"strict"`, `"lax"`, ...), and an
   entry-point (`jinjarope.environment`) to let other packages extend every environment.
+- Two template engines behind one protocol (`jinjarope.engine.TemplateEngine`): Jinja2
+  (`jinjarope.Environment`, default) and [minijinja](https://github.com/mitsuhiko/minijinja)
+  (`jinjarope.MiniJinjaEnvironment`, extra `minijinja`), with the same filters, loaders
+  and errors. Differences: [Template engines](https://phil65.github.io/jinjarope/template_engines/).
 - Subclasses of all jinja2 loaders with `__eq__`, `__hash__`, `__repr__` and `__getitem__`,
   plus fsspec-based and dict-based loaders.
 - JinjaFiles: TOML files declaring filters, tests, functions and environment config.
