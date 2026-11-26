@@ -1,4 +1,4 @@
-{% raw %}
+{% raw -%}
 jinjarope renders with [Jinja2](https://jinja.palletsprojects.com/) by default.
 `jinjarope.engine.TemplateEngine` describes what code needs from an environment, and two
 backends implement it:
@@ -75,6 +75,7 @@ Differences in templates:
 | `escape`: `&#34;` | `&quot;` | |
 | `pprint`: one line | indented | |
 | `urlencode`: spaces as `+` | `%20` | |
+| `trim_blocks` keeps the newline after `{% raw %}` | removes it | `{% raw -%}` or no newline there |
 | `"\a"` and other Python escapes in string literals | `\a` stays | |
 | `x is filter` / `x is test` for any value | names (strings) only | |
 | `filters` / `tests` globals include Jinja2's built-ins | only jinjarope's (Python) ones | |
