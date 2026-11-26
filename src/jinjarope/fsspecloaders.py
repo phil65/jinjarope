@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import functools
+import asyncio
 import pathlib
 from typing import TYPE_CHECKING, Any
 
@@ -16,9 +16,14 @@ if TYPE_CHECKING:
     import fsspec  # type: ignore[import-untyped]
 
 
-@functools.cache
+_template_cache: dict[str, str] = {}
+
+
 async def get_template(path: str) -> str:
-    return await upathtools.read_path(path)
+    # Cache the result, not the coroutine: a coroutine can only be awaited once.
+    if path not in _template_cache:
+        _template_cache[path] = await upathtools.read_path(path)
+    return _template_cache[path]
 
 
 class FsSpecProtocolPathLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
@@ -87,7 +92,9 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
 
     This loader allows to access templates from an fsspec filesystem.
 
-    Template paths must be relative to the filesystem root.
+    Template paths are relative to the path of the URL (``file:///templates``,
+    ``s3://bucket/prefix``, ``dir::github://...``), or to the filesystem root if
+    the URL has no path. Paths escaping that root (``../``) are rejected.
     In order to access templates via protocol path, see `FsSpecProtocolPathLoader`.
 
     Examples:
@@ -123,6 +130,7 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
         """
         import fsspec
         import fsspec.core  # type: ignore[import-untyped]
+        from fsspec.implementations.dirfs import DirFileSystem
 
         super().__init__()
         match fs:
@@ -133,6 +141,10 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
             case _:
                 self.fs, self.path = fs, ""
         self.storage_options = kwargs
+        # Templates are looked up relative to the URL's path ("dir::" URLs already
+        # give a DirFileSystem rooted there).
+        if self.path and not isinstance(self.fs, DirFileSystem):
+            self.fs = DirFileSystem(path=self.path, fs=self.fs)
 
     def __repr__(self) -> str:
         return utils.get_repr(self, fs=self.fs)
@@ -156,35 +168,36 @@ class FsSpecFileSystemLoader(loaders_.LoaderMixin, jinja2.BaseLoader):
             for f in files
         ]
 
+    def __contains__(self, path: str) -> bool:
+        try:
+            self.get_source(None, path)
+        except jinja2.TemplateNotFound:
+            return False
+        else:
+            return True
+
     def get_source(
         self,
-        environment: jinja2.Environment,
+        environment: jinja2.Environment | None,
         template: str,
     ) -> tuple[str, str, Callable[[], bool] | None]:
         try:
             with self.fs.open(template) as file:
                 src = file.read().decode()  # pyright: ignore
-        except FileNotFoundError as e:
+        except (FileNotFoundError, IsADirectoryError, ValueError) as e:
+            # DirFileSystem raises ValueError for paths escaping its root.
             raise jinja2.TemplateNotFound(template) from e
         path = pathlib.Path(template).as_posix()
         return src, path, lambda: True
 
     async def get_source_async(
         self,
-        environment: jinja2.Environment,
+        environment: jinja2.Environment | None,
         template: str,
     ) -> tuple[str, str, Callable[[], bool] | None]:
-        from upathtools.async_ops import get_async_fs
-
-        fs = await get_async_fs(self.fs)
-        try:
-            file = await fs.open_async(template)
-            async with file:
-                src = await file.read().decode()  # pyright: ignore
-        except FileNotFoundError as e:
-            raise jinja2.TemplateNotFound(template) from e
-        path = pathlib.Path(template).as_posix()
-        return src, path, lambda: True
+        # Most filesystems have no async file API (and an async one in sync mode is
+        # bound to fsspec's own loop), so read in a worker thread.
+        return await asyncio.to_thread(self.get_source, environment, template)
 
 
 if __name__ == "__main__":
