@@ -39,7 +39,7 @@ def extract_header_section(markdown: str, section_name: str) -> str | None:
         markdown: The markdown to extract a section from
         section_name: The header of the section to extract
     """
-    header_pattern = re.compile(f"^(#+) {section_name}$", re.MULTILINE)
+    header_pattern = re.compile(f"^(#+) {re.escape(section_name)}$", re.MULTILINE)
     md = str(markdown or "")
     header_match = header_pattern.search(md)
     if header_match is None:
