@@ -128,11 +128,27 @@ def entry_points(group: str) -> Mapping[str, Callable[..., Any]]:
     Returns:
         Mapping of entry point names to loaded callables
     """
+    import time
+
     from epregistry import EntryPointRegistry
 
     registry = EntryPointRegistry[Callable[..., Any]](group)
-    # load_all() handles exceptions internally and logs warnings for failures
-    return registry.load_all()
+    result: dict[str, Callable[..., Any]] = {}
+    for name, ep in registry.get_all().items():
+        start = time.perf_counter()
+        try:
+            result[name] = ep.load()
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Failed to load entry point %r from group %r: %s", name, group, e)
+            continue
+        # Importing a plugin's module can be slow (a package importing everything
+        # eagerly); make that visible instead of a mysteriously slow Environment().
+        if (elapsed := time.perf_counter() - start) > SLOW_ENTRY_POINT_SECONDS:
+            logger.info("Loading entry point %r (%s) took %.1f s", name, ep.value, elapsed)
+    return result
+
+
+SLOW_ENTRY_POINT_SECONDS = 0.5
 
 
 def get_hash(obj: Any, hash_length: int | None = 7) -> str:
