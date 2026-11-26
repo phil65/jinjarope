@@ -2,7 +2,7 @@
 
 [project]
 name = "jinjarope"
-version = "1.2.1"
+version = "1.2.2"
 description = "Jinja2 toolkit: enhanced Environment, extra filters / tests, fsspec-based loaders and TOML JinjaFiles."
 readme = "README.md"
 requires-python = ">=3.14"
