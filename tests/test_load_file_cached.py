@@ -51,3 +51,10 @@ def test_remote_paths_are_cached_by_url():
     path.write_text("remote", encoding="utf-8")
     assert envglobals.load_file_cached(path) == "remote"
     assert envglobals.load_file_cached("memory://jinjarope-test/t.txt") == "remote"
+
+
+def test_http_urls_go_through_upathtools(monkeypatch):
+    """No fsspec HTTP implementation needed (upathtools brings its own)."""
+    monkeypatch.setattr(envglobals, "_read_text", lambda p: f"from {p}")
+    url = "https://example.com/t.jinja"
+    assert envglobals.load_file_cached(url) == f"from {url}"

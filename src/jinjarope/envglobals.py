@@ -6,8 +6,6 @@ import pathlib
 import threading
 from typing import TYPE_CHECKING, Any
 
-import upath
-
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
@@ -60,7 +58,7 @@ def load_file_cached(path: AnyPath) -> str:
             return _read_text(path)  # raises the file system's error
         key: tuple[Any, ...] = (local, stat.st_mtime_ns, stat.st_size)
     else:
-        key = (str(upath.UPath(path)),)
+        key = (str(path),)  # no UPath here: it would load the fsspec implementation
     with _file_cache_lock:
         if (text := _file_cache.get(key)) is not None:
             _file_cache.move_to_end(key)
