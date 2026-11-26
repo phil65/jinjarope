@@ -76,10 +76,21 @@ print(env.render_string("{{ 'Hello World' | slugify }}"))  # hello_world
 - A read-only fsspec filesystem exposing a loader's templates (for debugging).
 - A `jinjarope` CLI to render (remote) templates: `jinjarope -i template.jinja -j config.toml -o out.md` (with the `cli` extra).
 
+### Templates are trusted code
+
+A `jinjarope.Environment` is full-power by design, not a sandbox. Templates can import
+modules (`import_module`), run shell commands (`get_output_from_call`), execute Python
+(`evaluate`), and, with the default `setup_loader()` / `get_loader()` (`fsspec_paths=True`),
+`{% include %}` any local file or URL (`"/etc/hostname"`, `"https://..."`), outside the
+loader's search path. Only render templates you would run as code. Pass
+`fsspec_paths=False` to keep includes inside the configured loaders; for untrusted
+templates, use `jinja2.sandbox.SandboxedEnvironment` instead.
+
 ### FsSpecFileSystemLoader
 
 Works like a `FileSystemLoader`, but on any fsspec-supported (remote) location.
-Using the `dir::` prefix, any folder can be set as root.
+The URL's path is the root (`file:///templates`, `s3://bucket/prefix`, or with the
+`dir::` prefix); paths escaping it (`../`) are not found.
 
 ```python
 import fsspec

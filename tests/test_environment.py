@@ -140,6 +140,24 @@ def test_with_globals():
     assert "name" not in env.globals
 
 
+def test_with_globals_does_not_leak_into_loaded_templates():
+    env = jinjarope.Environment(loader=jinja2.DictLoader({"t": "{{ a | default('unset') }}"}))
+    template = env.get_template("t")
+    with env.with_globals(a="TEMP"):
+        assert template.render() == "TEMP"
+    assert template.render() == "unset"
+    assert env.get_template("t").render() == "unset"
+
+
+def test_with_globals_restores_on_exception():
+    env = jinjarope.Environment()
+    env.globals["b"] = "old"
+    with pytest.raises(RuntimeError), env.with_globals(b=1, c=2):
+        raise RuntimeError
+    assert env.globals["b"] == "old"
+    assert "c" not in env.globals
+
+
 def test_setup_loader():
     env = jinjarope.Environment()
     env.setup_loader(dir_paths=["testresources"])
@@ -150,6 +168,40 @@ def test_evaluate():
     env = jinjarope.Environment()
     result = env.evaluate("1 + 1")
     assert result == 2  # noqa: PLR2004
+
+
+def test_evaluate_returns_stdout_and_keeps_globals_clean():
+    env = jinjarope.Environment()
+    result = env.evaluate("print('hi')\nx = 5\nx + 1")
+    assert result == "hi\n6"
+    assert "x" not in env.globals
+    assert "__builtins__" not in env.globals
+
+
+def test_evaluate_uses_context():
+    env = jinjarope.Environment()
+    assert env.evaluate("y * 2", context={"y": 21}) == 42  # noqa: PLR2004
+    assert "y" not in env.globals
+
+
+def test_evaluate_does_not_swap_sys_stdout(monkeypatch):
+    import sys
+
+    seen = []
+
+    class Spy:
+        def write(self, s: str) -> int:
+            seen.append(s)
+            return len(s)
+
+        def flush(self) -> None:
+            pass
+
+    spy = Spy()
+    monkeypatch.setattr(sys, "stdout", spy)
+    env = jinjarope.Environment()
+    assert env.evaluate("import sys\nsys.stdout is __spy__", context={"__spy__": spy}) is True
+    assert seen == []
 
 
 def test_get_config():

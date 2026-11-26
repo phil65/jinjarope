@@ -106,7 +106,9 @@ class LoaderRegistry:
             module_paths: (dotted) package paths
             functions: A list of callables
             static: A dictionary containing a path-> template mapping
-            fsspec_paths: Whether a loader for FsSpec protcol paths should be added
+            fsspec_paths: Whether a loader for FsSpec protocol paths should be added.
+                It takes any local path or URL as template name, so templates can
+                include any file or URL: only use it for trusted templates.
         """
         match args:
             case (str() as path,):

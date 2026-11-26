@@ -699,16 +699,27 @@ class Environment(jinja2.Environment):
         """Context manager to temporarily set globals for the environment.
 
         This context manager allows temporarily overriding the environment's
-        globals with the provided values. Any changes made within the context
-        manager are reverted upon exiting the context.
+        globals with the provided values. The previous values are restored on exit,
+        also when the block raises.
+
+        The globals dict is changed in place (templates loaded before see the
+        values too), so this is not safe while other threads or tasks render with
+        the same environment: pass render variables there instead.
 
         Args:
             kwargs: Globals to set
         """
-        temp = self.globals.copy()
+        missing = object()
+        previous = {k: self.globals.get(k, missing) for k in kwargs}
         self.globals.update(kwargs)
-        yield
-        self.globals = temp
+        try:
+            yield
+        finally:
+            for k, v in previous.items():
+                if v is missing:
+                    self.globals.pop(k, None)
+                else:
+                    self.globals[k] = v
 
     def setup_loader(
         self,
@@ -727,7 +738,9 @@ class Environment(jinja2.Environment):
             dir_paths: List of directory paths to search for templates
             module_paths: List of module paths to search for templates
             static: Dictionary of static files to include in the loader
-            fsspec_paths: Whether to use fsspec paths for loading
+            fsspec_paths: Whether to add a loader taking any local path or fsspec URL
+                as template name. With it, templates can include any file or URL,
+                outside of ``dir_paths``: only use it for trusted templates.
         """
         self.loader = jinjarope.get_loader(
             dir_paths=dir_paths,
@@ -740,36 +753,40 @@ class Environment(jinja2.Environment):
         self,
         code: str,
         context: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Any:
         """Evaluate python code and return the caught stdout + return value of last line.
 
-        This function executes Python code within the environment's
-        globals. It captures the standard output generated during
-        execution and returns the combined result as a string.
+        The code runs in a copy of the environment's globals (updated with
+        ``context``), so its assignments don't leak into the environment.
+        Output of ``print()`` calls is captured without swapping ``sys.stdout``
+        (writes to ``sys.stdout`` itself are not captured).
 
         Args:
             code: The code to execute
-            context: Globals for the execution environment
+            context: Additional globals for the execution
 
         Returns:
-            The combined standard output and return value of the last
-            line of code.
+            The value of the last line if nothing was printed (``""`` for ``None``),
+            otherwise the printed output followed by that value.
         """
         now = time.time()
         logger.debug("Evaluating code:\n%s", code)
         tree = ast.parse(code)
-        eval_expr = ast.Expression(tree.body[-1].value)  # ty: ignore[missing-attribute]
-        # exec_expr = ast.Module(tree.body[:-1])
-        exec_expr = ast.parse("")
-        exec_expr.body = tree.body[:-1]
-        compiled = compile(exec_expr, "file", "exec")
+        last = tree.body[-1] if tree.body else None
+        eval_expr = ast.Expression(last.value) if isinstance(last, ast.Expr) else None
+        exec_expr = ast.Module(body=tree.body[:-1] if eval_expr else tree.body, type_ignores=[])
         buffer = io.StringIO()
-        with contextlib.redirect_stdout(buffer):
-            exec(compiled, self.globals)
-            val = eval(compile(eval_expr, "file", "eval"), self.globals)
+
+        def _print(*args: Any, file: Any = None, **kwargs: Any) -> None:
+            print(*args, file=buffer if file is None else file, **kwargs)
+
+        namespace: dict[str, Any] = {**self.globals, **(context or {}), "print": _print}
+        exec(compile(exec_expr, "file", "exec"), namespace)
+        val = eval(compile(eval_expr, "file", "eval"), namespace) if eval_expr else None
         logger.debug("Code evaluation took %s seconds.", time.time() - now)
-        # result = mk.MkContainer([buffer.getvalue(), val])
-        return val or ""
+        if output := buffer.getvalue():
+            return output if val is None else f"{output}{val}"
+        return "" if val is None else val
 
     def get_config(self) -> envconfig.EnvConfig:
         """All environment settings as a dict (not included: undefined and loaders).
