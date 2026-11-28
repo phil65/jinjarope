@@ -102,13 +102,13 @@ def _get_decorator_names(decorators: list[ast.expr]) -> list[str]:
     """Extract decorator names from AST nodes."""
     names: list[str] = []
     for dec in decorators:
-        if isinstance(dec, ast.Name):
-            names.append(f"@{dec.id}")
-        elif isinstance(dec, ast.Call):
-            if isinstance(dec.func, ast.Name):
-                names.append(f"@{dec.func.id}")
-            elif isinstance(dec.func, ast.Attribute):
-                names.append(f"@{dec.func.attr}")
+        match dec:
+            case ast.Name(id=name):
+                names.append(f"@{name}")
+            case ast.Call(func=ast.Name(id=name)):
+                names.append(f"@{name}")
+            case ast.Call(func=ast.Attribute(attr=attr)):
+                names.append(f"@{attr}")
     return names
 
 

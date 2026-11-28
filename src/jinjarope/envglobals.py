@@ -3,6 +3,7 @@ import datetime as dt
 import logging
 import os
 import pathlib
+import subprocess
 import threading
 from typing import TYPE_CHECKING, Any
 
@@ -99,8 +100,6 @@ def get_output_from_call(
         cwd: The working directory for the call
         use_cache: Whether to cache the output of calls
     """
-    import subprocess
-
     if not call:
         return None
     if not isinstance(call, str):
